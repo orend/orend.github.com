@@ -4,7 +4,7 @@
   <title><![CDATA[Oren's Blog]]></title>
   <link href="http://orend.github.com/atom.xml" rel="self"/>
   <link href="http://orend.github.com/"/>
-  <updated>2012-07-07T22:11:34-04:00</updated>
+  <updated>2012-07-08T21:52:02-04:00</updated>
   <id>http://orend.github.com/</id>
   <author>
     <name><![CDATA[Oren Dobzinski]]></name>
@@ -12,5 +12,14 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Hello World]]></title>
+    <link href="http://orend.github.com/blog/2012/07/08/hello-world/"/>
+    <updated>2012-07-08T21:50:00-04:00</updated>
+    <id>http://orend.github.com/blog/2012/07/08/hello-world</id>
+    <content type="html"><![CDATA[<p>Hello, cruel world! that&#8217;s the first blog post using Octopress.</p>
+]]></content>
+  </entry>
   
 </feed>
