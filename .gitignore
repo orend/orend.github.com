@@ -3,6 +3,7 @@
 .sass-cache
 .gist-cache
 .pygments-cache
+.rake_tasks~
 _deploy
 public
 sass.old
