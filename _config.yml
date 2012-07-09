@@ -3,7 +3,7 @@
 # ----------------------- #
 
 url: http://orend.github.com
-title: Oren's Blog
+title: I am the walrus
 subtitle: ramblings of a rubyist.
 author: Oren Dobzinski
 simple_search: http://google.com/search
@@ -89,8 +89,8 @@ delicious_user:
 delicious_count: 3
 
 # Disqus Comments
-disqus_short_name:
-disqus_show_comment_count: false
+disqus_short_name: orensblog
+disqus_show_comment_count: true
 
 # Google Analytics
 google_analytics_tracking_id: UA-33242196-1
