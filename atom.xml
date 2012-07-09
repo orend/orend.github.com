@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Oren's Blog]]></title>
+  <title><![CDATA[I am the walrus]]></title>
   <link href="http://orend.github.com/atom.xml" rel="self"/>
   <link href="http://orend.github.com/"/>
-  <updated>2012-07-08T22:01:34-04:00</updated>
+  <updated>2012-07-08T22:08:41-04:00</updated>
   <id>http://orend.github.com/</id>
   <author>
     <name><![CDATA[Oren Dobzinski]]></name>
