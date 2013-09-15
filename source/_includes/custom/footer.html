@@ -1,4 +1,19 @@
-<p>
-  Copyright &copy; {{ site.time | date: "%Y" }} - {{ site.author }} -
-  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+<p class="pull-left">
+  <a href="{{ root_url }}/">{{ site.title }}</a>
+  - Copyright &copy; {{ site.time | date: "%Y" }} - {{ site.author }}
+</p>
+<p class="pull-right">
+  {% unless site.hide_design_credits %}
+    <span>Designed by <a href="http://blog.hyfather.com" target="_blank">Nikhil
+  Mungel</a>. Based on <a href="https://github.com/sevenadrian/foxslide"
+  target="_blank">foxslide</a>.</span><br/>
+  {% endunless %}
+  <span>
+    Powered by <a href="http://octopress.org/" target="_blank">Octopress</a>.
+  </span>
+  <span>
+    Cover photo
+    by <a href="http://www.flickr.com/photos/69912667@N07/6778147487/"
+    target="_blank">Carrie Nelson</a>.
+  </span>
 </p>
