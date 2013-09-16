@@ -2,9 +2,9 @@
 #      Main Configs       #
 # ----------------------- #
 
-url: http://www.agilus.org
-title: "Agilus"
-subtitle: Oren Dobzinski's Blog
+url: http://www.refactor.com
+title: "Re-factor"
+subtitle: Never stop improving
 author: Oren Dobzinski
 simple_search: http://google.com/search
 description:
