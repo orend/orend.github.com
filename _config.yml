@@ -63,7 +63,7 @@ default_asides: [custom/asides/about.html, asides/recent_posts.html, asides/gith
 # ----------------------- #
 
 # Github repositories
-github_user: orend
+github_user:
 github_repo_count: 5
 github_show_profile_link: false
 github_skip_forks: true
@@ -104,6 +104,6 @@ google_analytics_tracking_id: UA-33267246-1
 facebook_like: true
 
 mailchimp: true
-mailchimp_list_name: list
-mailchimp_list_why: What's in it for them?
+mailchimp_list_name: email updates
+mailchimp_list_why:
 mailchimp_embed_action: http://agilus.us7.list-manage1.com/subscribe/post?u=ce7bc3f295d0564ac326f2fd5&amp;id=4be76ba863
