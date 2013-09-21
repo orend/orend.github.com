@@ -2,7 +2,7 @@
 #      Main Configs       #
 # ----------------------- #
 
-url: http://www.re-factor.com
+url: http://re-factor.com
 title: "Re-factor"
 subtitle: Never stop improving
 author: Oren Dobzinski
@@ -19,7 +19,7 @@ date_format: "ordinal"
 subscribe_rss: /atom.xml
 subscribe_email:
 # RSS feeds can list your email address if you like
-email:
+email: oren@re-factor.com
 
 # ----------------------- #
 #    Jekyll & Plugins     #
@@ -104,6 +104,6 @@ google_analytics_tracking_id: UA-33267246-1
 facebook_like: true
 
 mailchimp: true
-mailchimp_list_name: email updates
-mailchimp_list_why:
+mailchimp_list_name: re-factor newsletter
+mailchimp_list_why: improve your code quality
 mailchimp_embed_action: http://agilus.us7.list-manage1.com/subscribe/post?u=ce7bc3f295d0564ac326f2fd5&amp;id=4be76ba863
