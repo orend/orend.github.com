@@ -1,23 +1,23 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
-        <loc>http://www.re-factor.com/blog/2012/07/08/hello-world/</loc>
+        <loc>http://re-factor.com/blog/2012/07/08/hello-world/</loc>
         <lastmod>2013-09-15T21:34:03-04:00</lastmod>
     </url>
     <url>
-        <loc>http://www.re-factor.com/archives/</loc>
+        <loc>http://re-factor.com/archives/</loc>
         <lastmod>2013-09-15T21:34:03-04:00</lastmod>
     </url>
     <url>
-        <loc>http://www.re-factor.com/blog/archives/</loc>
+        <loc>http://re-factor.com/blog/archives/</loc>
         <lastmod>2013-09-15T21:34:03-04:00</lastmod>
     </url>
     <url>
-        <loc>http://www.re-factor.com/blog/</loc>
+        <loc>http://re-factor.com/blog/</loc>
         <lastmod>2013-09-15T21:34:03-04:00</lastmod>
     </url>
     <url>
-        <loc>http://www.re-factor.com/</loc>
+        <loc>http://re-factor.com/</loc>
         <lastmod>2013-09-15T21:34:03-04:00</lastmod>
     </url>
 </urlset>

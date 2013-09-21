@@ -2,22 +2,22 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Re-factor]]></title>
-  <link href="http://www.re-factor.com/atom.xml" rel="self"/>
-  <link href="http://www.re-factor.com/"/>
-  <updated>2013-09-16T13:06:54-04:00</updated>
-  <id>http://www.re-factor.com/</id>
+  <link href="http://re-factor.com/atom.xml" rel="self"/>
+  <link href="http://re-factor.com/"/>
+  <updated>2013-09-21T16:44:04-04:00</updated>
+  <id>http://re-factor.com/</id>
   <author>
     <name><![CDATA[Oren Dobzinski]]></name>
-    
+    <email><![CDATA[oren@re-factor.com]]></email>
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
   
   <entry>
     <title type="html"><![CDATA[Hello World]]></title>
-    <link href="http://www.re-factor.com/blog/2012/07/08/hello-world/"/>
+    <link href="http://re-factor.com/blog/2012/07/08/hello-world/"/>
     <updated>2012-07-08T21:50:00-04:00</updated>
-    <id>http://www.re-factor.com/blog/2012/07/08/hello-world</id>
+    <id>http://re-factor.com/blog/2012/07/08/hello-world</id>
     <content type="html"><![CDATA[<p>Hello, cruel world! that&rsquo;s the first blog post using Octopress.</p>
 ]]></content>
   </entry>
