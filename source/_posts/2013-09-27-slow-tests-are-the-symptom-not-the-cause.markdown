@@ -5,6 +5,7 @@ date: 2013-09-27 10:02
 comments: true
 categories:
 published: true
+author: Oren Dobzinski
 ---
 
 If you have a slow test suite and you are asking yourself "how can I make my tests faster?" then you are asking the wrong question. Most chances are that you have bigger problems than just slow tests. The test slowness is merely the symptom; what you should really address is the cause. Once the real cause is addressed you will find that it's easy to write new fast tests and straightforward to refactor existing tests.
