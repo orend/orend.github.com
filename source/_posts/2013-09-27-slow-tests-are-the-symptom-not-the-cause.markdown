@@ -56,6 +56,7 @@ class User < ActiveRecord::Base
     user = User.find_by!(username: username)
     NotifiesUser.run(user, 'blog_list')
     user.update_attributes(mailing_list_name: 'blog_list')
+    user
   end
 end
 ```
