@@ -7,15 +7,12 @@
   <meta charset="utf-8">
   <title>Blog Archive - Re-factor</title>
   <meta name="author" content="Oren Dobzinski">
-  <link rel="author" href="humans.txt">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
   
-    
+  <meta name="description" content=" Tweet Blog Archive 2013 Lorem Ipsum
+Sep 27 2013 ">
   
-  <meta name="description" content=" 2012 Hello World
-Jul 08 2012 ">
-  
+
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
   <meta name="MobileOptimized" content="320">
@@ -24,18 +21,11 @@ Jul 08 2012 ">
   
   <link rel="canonical" href="http://re-factor.com/blog/archives/">
   <link href="/favicon.png" rel="icon">
-  <link href='http://fonts.googleapis.com/css?family=Cantarell' rel='stylesheet' type='text/css'>
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
   <link href="/atom.xml" rel="alternate" title="Re-factor" type="application/atom+xml">
-  <meta name="og:type" content="website" />
-  <meta name="og:site_name" content="Re-factor" />
-  <meta name="og:title" content="Blog Archive" />
-  <meta name="og:description" content=" 2012 Hello World
-Jul 08 2012 " />
-  <meta name="og:url" content="http://re-factor.com/blog/archives/index.html"/>
-  <meta name="url" content="http://re-factor.com/blog/archives/index.html">
-  
-  <meta name="distribution" content="global">
   <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
 <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
 <link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
@@ -56,83 +46,51 @@ Jul 08 2012 " />
 
 </head>
 
-<nav role="navigation"><div class="navbar">
-  <div class="navbar-inner">
-    <a class="brand" href="/">Re-factor</a>
-    <ul class="nav">
-      <li><a href="/blog/archives">All Posts</a></li>
-      
-    </ul>
-    <ul class="nav" data-subscription="rss">
-      <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-      
-    </ul>
-      
-    <form class="navbar-form" action="http://google.com/search" method="get">
-      <fieldset role="search">
-        <input type="hidden" name="q" value="site:re-factor.com" />
-        <input class="span2" type="text" name="q" results="0" placeholder="Search"/>
-      </fieldset>
-    </form>
-      
-    
+<body >
+  <header role="banner" id="sidebar">
+    <!-- Logo -->
+<aside id="logo" class="clearfix">
+  <div class="clearfix">
+    <a href="/">Re-factor</a>
   </div>
-</div>
-</nav>
-<div class="wrapper_single">
-  <div class="container">
-    <article class="span8 offset2 article-format role="article">
-      <div role="div">
+</aside>
+
+<ul id="menu">
+
+  <li class="title">
+    <h1 id="title"><a href="/">Re-factor</a></h1>
+  </li>
+
+
+  <li class="subtitle">
+    <h2 id="subtitle">Never stop improving</h2>
+  </li>
+
+  <li class="link">
+    <a href="http://eepurl.com/FF4ET">newsletter</a>
+  </li>
+  <li class="link">
+    <a href="/about">about</a>
+  </li>
+
+  <li class="link">
+    <a href="http://twitter.com/orend/">twitter</a>
+  </li>
+
+
+  <li class="link rss">
+    <a href="/atom.xml">rss feed</a>
+  </li>
+</ul>
+
+
+
+
+
+<aside id="octopress_linkback">
+    <span class="unicode_square">
+      <span class="unicode_circle">
         
-        <header>
-          <h1 class="entry-title">Blog Archive</h1>
-          
-        </header>
-        
-        <div id="blog-archives">
-
-
-
-  
-  <h2>2012</h2>
-
-<article class="archive-article-format">
-  
-<h2><a href="/blog/2012/07/08/hello-world/">Hello World</a></h2>
-<time datetime="2012-07-08T21:50:00-04:00" pubdate><span class='month'>Jul</span> <span class='day'>08</span> <span class='year'>2012</span></time>
-
-
-</article>
-
-</div>
-
-        
-          <footer>
-            
-          </footer>
-        
-      </div>
-    
-    </article>
-  </div>
-</div>
-<div id="footer-widgets">
-  <div class="container">
-    <div class="row">
-  <div class="span3">
-    <h2>recent posts</h2>
-    <ul class="recent_posts">
-      
-        <li>
-          <a href="/blog/2012/07/08/hello-world/">Hello World</a>
-        </li>
-      
-    </ul>
-    <h2><a href="/blog/archives">archives</a></h2>
-  </div>
-  <div class="span4">
-    
-	<h2> re-factor newsletter</h2>
 	improve your code quality
 	<form action="http://re-factor.us7.list-manage.com/subscribe/post?u=ce7bc3f295d0564ac326f2fd5&amp;id=4be76ba863" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" target="_blank">
 		<input type="text" placeholder="Your Email Here" autocomplete="off" name="EMAIL" id="mce-EMAIL">
@@ -140,54 +98,64 @@ Jul 08 2012 " />
 	</form>
 
 
-  </div>
-  <div class="span3">
+      </span>
+    </span>
+    <span class="octopress"></span>
+</aside>
+
+  </header>
+  <section id="main">
+    <div>
+<article role="article" class="post">
+  
+    <div class="sharing-box">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://re-factor.com/blog/archives/index.html" data-via="orend" data-counturl="http://re-factor.com/blog/archives/index.html" data-size="large">Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+  <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+  
+  
+  <header>
+    <h2 class="entry-title">Blog Archive</h2>
     
-<h2>twitter</h2>
-<a href="https://twitter.com/orend" class="twitter-follow-button" data-show-count="true" data-lang="en">Follow @orend</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-<div class="tweet" data-twitter-user="orend">
-</div>
-
-
-  </div>
-</div>
-
-  </div>
-</div>
-<footer class="footer">
-  <div class="container">
-    <p class="pull-left">
-  <a href="/">Re-factor</a>
-  - Copyright &copy; 2013 - Oren Dobzinski
-</p>
-<p class="pull-right">
+  </header>
   
-    <span>Designed by <a href="http://blog.hyfather.com" target="_blank">Nikhil
-  Mungel</a>. Based on <a href="https://github.com/sevenadrian/foxslide"
-  target="_blank">foxslide</a>.</span><br/>
+  <div id="blog-archives">
+
+
+
   
-  <span>
-    Powered by <a href="http://octopress.org/" target="_blank">Octopress</a>.
-  </span>
-  <span>
-    Cover photo
-    by <a href="http://www.flickr.com/photos/69912667@N07/6778147487/"
-    target="_blank">Carrie Nelson</a>.
-  </span>
-</p>
+  <h2>2013</h2>
 
-  </div>
-</footer>
+<article>
+  
+<h1><a href="/blog/2013/09/27/lorem-ipsum/">Lorem Ipsum</a></h1>
+<time datetime="2013-09-27T11:29:00-04:00" pubdate><span class='month'>Sep</span> <span class='day'>27</span> <span class='year'>2013</span></time>
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
-<script>window.jQuery || document.write('<script src="/javascripts/libs/jquery-1.7.2.min.js" type="text/javascript"><\/script>')</script>
-<script src="/javascripts/libs/bootstrap.min.js" type="text/javascript"></script>
-<script src="/javascripts/jquery.tweet.js" type="text/javascript"></script>
-<script src="/javascripts/jquery.instagram.js" type="text/javascript"></script>
-<script src="/javascripts/libs/jquery.masonry.min.js" type="text/javascript"></script>
-<script src="/javascripts/custom.js" type="text/javascript"></script>
 
+</article>
+
+</div>
+
+  
+</article>
+
+</div>
+
+    <nav role="navigation" id="pagination">
+
+</nav>
+  </section>
+  
+
+  
 
 <script type="text/javascript">
       var disqus_shortname = 'orensblog';
@@ -230,7 +198,7 @@ Jul 08 2012 " />
       var twitterWidgets = document.createElement('script');
       twitterWidgets.type = 'text/javascript';
       twitterWidgets.async = true;
-      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
       document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
     })();
   </script>
@@ -238,3 +206,5 @@ Jul 08 2012 " />
 
 
 
+</body>
+</html>
