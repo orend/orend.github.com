@@ -221,6 +221,7 @@
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
 <span class='line-number'>9</span>
+<span class='line-number'>10</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
 </span><span class='line'>  <span class="n">validates_uniqueness_of</span> <span class="ss">:username</span>
 </span><span class='line'>
@@ -228,6 +229,7 @@
 </span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find_by!</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="n">username</span><span class="p">)</span>
 </span><span class='line'>    <span class="no">NotifiesUser</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="s1">&#39;blog_list&#39;</span><span class="p">)</span>
 </span><span class='line'>    <span class="n">user</span><span class="o">.</span><span class="n">update_attributes</span><span class="p">(</span><span class="n">mailing_list_name</span><span class="p">:</span> <span class="s1">&#39;blog_list&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
