@@ -1,0 +1,570 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Slow Tests Are the Symptom, Not the Cause - Re-factor</title>
+  <meta name="author" content="Oren Dobzinski">
+
+  
+  <meta name="description" content="Tweet Slow Tests Are the Symptom, Not the Cause Sep 14th, 2013 | Comments TL;DR: Extract service objects and completely remove rails dependencies in &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://re-factor.com/blog/2013/09/14/slow-tests-are-the-symptom-not-the-cause/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Re-factor" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-33267246-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+  <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+</head>
+
+<body >
+  <header role="banner" id="sidebar">
+    <!-- Logo -->
+<aside id="logo" class="clearfix">
+  <div class="clearfix">
+    <a href="/">Re-factor</a>
+  </div>
+</aside>
+
+<ul id="menu">
+
+  <li class="title">
+    <h1 id="title"><a href="/">Re-factor</a></h1>
+  </li>
+
+
+  <li class="subtitle">
+    <h2 id="subtitle">Never stop improving</h2>
+  </li>
+
+
+  <li class="link">
+    <a href="/about">about</a>
+  </li>
+
+  <li class="link">
+    <a href="http://twitter.com/orend/">twitter</a>
+  </li>
+
+
+  <li class="link rss">
+    <a href="/atom.xml">rss feed</a>
+  </li>
+  <li>
+    &nbsp;
+  </li>
+
+  <li>
+    <span class="subtitle">
+      <span class="unicode_circle">
+        <h2 id="subtitle">
+	improve your code quality
+	<form action="http://re-factor.us7.list-manage.com/subscribe/post?u=ce7bc3f295d0564ac326f2fd5&amp;id=4be76ba863" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" target="_blank">
+		<input type="text" placeholder="Your Email Here" autocomplete="off" name="EMAIL" id="mce-EMAIL">
+		<input type="submit" value="Get Tips" name="subscribe" id="mc-embedded-subscribe" class="btn btn-primary">
+	</form>
+
+</h2>
+      </span>
+    </span>
+    <span class="octopress"></span>
+  </li>
+</ul>
+
+
+
+
+
+<aside id="octopress_linkback">
+    <span class="unicode_square">
+      <span class="unicode_circle">
+        powered by octopress
+      </span>
+    </span>
+    <span class="octopress"></span>
+</aside>
+
+  </header>
+  <section id="main">
+    <article class="post">
+  <div class="sharing-box">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://re-factor.com/blog/2013/09/14/slow-tests-are-the-symptom-not-the-cause/" data-via="orend" data-counturl="http://re-factor.com/blog/2013/09/14/slow-tests-are-the-symptom-not-the-cause/" data-size="large">Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+</div>
+
+  
+  <header>
+    
+      <h2 class="entry-title">Slow Tests Are the Symptom, Not the Cause</h2>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-09-14T22:34:00-04:00" pubdate data-updated="true">Sep 14<span>th</span>, 2013</time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<p><strong>TL;DR:</strong> Extract service objects and completely remove rails dependencies in tests to achieve the fastest possible tests, but more importantly &ndash; a better design. Skip to <a href="#[the-complete-refactoring]">The Complete Refactoring</a> section if you only want to see the refactoring.</p>
+
+<!--more-->
+
+
+<h2>Starting With A Fat Controller</h2>
+
+<p>Suppose you have a controller that&rsquo;s responsible for handling users signing up for a mailing list:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">EmailListsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="n">respond_to</span> <span class="ss">:json</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find_or_create_by</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="n">params</span><span class="o">[</span><span class="ss">:username</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>    <span class="no">NotifiesUser</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="s1">&#39;blog_list&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span><span class="o">.</span><span class="n">update_attributes</span><span class="p">(</span><span class="n">email_list_name</span><span class="p">:</span> <span class="s1">&#39;blog_list&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">respond_with</span> <span class="n">user</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We first find the user or create it if it doesn&rsquo;t exist. Then we notify the user she was added to the mailing list via <code>NotifiesUser</code> (probably asking her to confirm). We update the user record with the name of the mailing list and then hand the <code>user</code> object to <code>respond_with</code>, which will render the json representation of the user or the proper error response in case saving of the object failed.</p>
+
+<p>The logic here is pretty straight-forward, but it&rsquo;s still too complicated for a controller and should be extracted out. But where to? The word <code>user</code> in almost every line here suggests that we should push it into the <code>User</code> model (that&rsquo;s <a href="http://sourcemaking.com/refactoring/feature-envy">Feature Envy</a>). Let&rsquo;s try this:</p>
+
+<h2>Extracting Logic to a Fat Model</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">EmailListsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="n">respond_to</span> <span class="ss">:json</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">addToEmailList</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:username</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;blog_list&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">respond_with</span> <span class="n">user</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">validates_uniqueness_of</span> <span class="ss">:username</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">addToEmailList</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">email_list_name</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find_or_create_by</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="n">username</span><span class="p">)</span>
+</span><span class='line'>    <span class="no">NotifiesUser</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="s1">&#39;blog_list&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span><span class="o">.</span><span class="n">update_attributes</span><span class="p">(</span><span class="n">email_list_name</span><span class="p">:</span> <span class="s1">&#39;blog_list&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This is better: the <code>User</code> class is now responsible for creating and updating users. But there are still a few problems. The first one is that now <code>User</code> is handling mailing list additions, as well user notifications. These are too many responsibilities for one class. Having an active record object handle anything more than CRUD and associations is a violation of the <a href="http://en.wikipedia.org/wiki/Single_responsibility_principle">Single Responsibility Principle</a>.</p>
+
+<p>The second problem is that business logic in active record classes is a pain to unit test. You often need to use factories or to heavily stub out methods of the object under test (don&rsquo;t do that), stub all instances of the class under test (don&rsquo;t do that either) or hit the database in your unit tests (please don&rsquo;t). As a result, testing active record objects can be very slow, sometimes orders of magnitude slower than testing plain ruby objects.</p>
+
+<p>Now, if the code above was the entire <code>User</code> class and my application was small and simple I&rsquo;d be perfectly happy with leaving <code>User#addToEmailList</code> as is. But more complex rails apps that are not groomed often enough tend to have large &lsquo;god classes&rsquo; such as <code>User</code> or <code>Order</code> that attract every piece of logic that touches the model. Slow tests make an app harder to maintain and harder to work with. This is when introducing a <a href="http://blog.codeclimate.com/blog/2012/10/17/7-ways-to-decompose-fat-activerecord-models/">service object</a> is helpful:</p>
+
+<h2>Extacting a Service Object</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">EmailListsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="n">respond_to</span> <span class="ss">:json</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="no">AddsUserToList</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:username</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;blog_list&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">respond_with</span> <span class="n">user</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AddsUserToList</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">run</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">email_list_name</span><span class="p">)</span>
+</span><span class='line'>    <span class="no">User</span><span class="o">.</span><span class="n">find_or_create_by</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="n">username</span><span class="p">)</span><span class="o">.</span><span class="n">tap</span> <span class="k">do</span> <span class="o">|</span><span class="n">user</span><span class="o">|</span>
+</span><span class='line'>      <span class="no">NotifiesUser</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="s1">&#39;blog_list&#39;</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">user</span><span class="o">.</span><span class="n">update_attributes</span><span class="p">(</span><span class="n">email_list_name</span><span class="p">:</span> <span class="s1">&#39;blog_list&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We created a plain ruby object, <code>AddsUserToList</code>, which contains the business logic from before (with <code>tap</code> to make things a little nicer). In the controller we call this object and not <code>User</code> directly.
+This is an improvement, but testing this service object would require us to somehow stub <code>User#find_or_create_by</code> to avoid hitting the database, and probably also stub out <code>NotifiesUser#run</code> in order to avoid sending a real notification out. In any case, hard-coding the name of the class of your collaborator is a really bad idea since it couples your class with your collaborators forever.</p>
+
+<p>Also, referencing the class <code>User</code> directly means that our unit tests will have to load active record and the entire rails stack, but even worse &ndash; the entire app and its dependencies. This load time can be a few seconds for trivial rails apps, but can sometimes be 30 seconds for really big rails apps. Unit tests should be <em>fast</em> to run as part of your test suite but also fast to run individually, which means they should not load the rails stack or your application (also see <a href="http://www.youtube.com/watch?v=bNn6M2vqxHE">Corey Haines&rsquo;s talk</a>
+ on the subject).</p>
+
+<p>The most straight forward way to decouple the object from its collabortors is to inject the dependencies of <code>AddsUserToList</code>:</p>
+
+<h2>Injecting Dependencies</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AddsUserToList</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">run</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">email_list_name</span><span class="p">,</span> <span class="n">creates_user</span> <span class="o">=</span> <span class="no">User</span><span class="p">,</span> <span class="n">notifies_user</span> <span class="o">=</span> <span class="no">NotifiesUser</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">creates_user</span><span class="o">.</span><span class="n">find_or_create_by</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="n">username</span><span class="p">)</span><span class="o">.</span><span class="n">tap</span> <span class="k">do</span> <span class="o">|</span><span class="n">user</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">notifies_user</span><span class="o">.</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">email_list_name</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">user</span><span class="o">.</span><span class="n">update_attributes</span><span class="p">(</span><span class="n">email_list_name</span><span class="p">:</span> <span class="n">email_list_name</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We can now pass any class that creates a user and any class that notifies a user, which means testing will be easier which makes passing a different implementation of the dependencies will also be easy. Since we supplied reasonable defaults we don&rsquo;t need to pass these dependencies at all, and our controller can stay unchanged.</p>
+
+<p>The fact that we are specifying <code>User</code> as the default value of creates_user in the parameter list does <em>not</em> mean that this class and all its dependants (ActiveRecord, our app and other gems) will get loaded. Ruby&rsquo;s <em>Deferred Evaluation</em> of the default values means that if these default values are not needed they will not get loaded, so we can run the unit test without loading rails.</p>
+
+<h2>Simplifying the Interface</h2>
+
+<p>The method <code>AddsUserToList#run</code> receives 4 arguments. Users of this method need to know the <em>order</em> of the list. Also, it is likely that over time you&rsquo;d discover you need to add more arguments. When this happens you will need to update all users of the method. A more flexible solution is to use a hash of arguments. This will make the interface more stable and esure the number of arguments does not grow when we find that we need to add more arguments. I often find that for many classes I end up changing from an argument list to a hash of options at some point, so why not <a href="http://www.poodr.com/">use it in the first place</a>? But does it mean that we need to give up the advantages of deferred evaluation of the default values? Not at all.</p>
+
+<p>We will use <code>Hash#fetch</code> which receives a block that is not evaluated unless the queried key is not present. The code in the block to <code>fetch</code> will never get evaluated, and <code>User</code> won&rsquo;t get loaded. In addition, if we need to evealuate more than one statement when computing the default value we can&rsquo;t do it in the argument list itself, but we can do it using <code>Hash#fetch</code>.</p>
+
+<p>Before I present the final code snippet I&rsquo;d like to make another comment: when my classes contain only one public method I don&rsquo;t like calling it &lsquo;run&rsquo;, &lsquo;do&rsquo; or &lsquo;perform&rsquo; since these names don&rsquo;t convey a lot of information. In this case I&rsquo;d rather call it &lsquo;call&rsquo; and use ruby&rsquo;s shorthand notation for invoking this method. A nice bonus is being able to pass in a proc instead of the class itself if I need it.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AddsUserToList</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">run</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">creates_user</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:creates_user</span><span class="p">)</span> <span class="p">{</span> <span class="no">User</span> <span class="p">}</span>
+</span><span class='line'>    <span class="n">notifies_user</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:notifies_user</span><span class="p">)</span> <span class="p">{</span> <span class="no">NotifiesUser</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">creates_user</span><span class="o">.</span><span class="n">find_or_create_by</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:username</span><span class="p">))</span><span class="o">.</span><span class="n">tap</span> <span class="k">do</span> <span class="o">|</span><span class="n">user</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">notifies_user</span><span class="o">.</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:email_list_name</span><span class="p">))</span>
+</span><span class='line'>      <span class="n">user</span><span class="o">.</span><span class="n">update_attributes</span><span class="p">(</span><span class="n">email_list_name</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:email_list_name</span><span class="p">))</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The end result looks like this:</p>
+
+<h2>The Complete Refactoring</h2>
+
+<p>Before:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">EmailListsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="n">respond_to</span> <span class="ss">:json</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">find_or_create_by</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="n">params</span><span class="o">[</span><span class="ss">:username</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>    <span class="no">NotifiesUser</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="s1">&#39;blog_list&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span><span class="o">.</span><span class="n">update_attributes</span><span class="p">(</span><span class="n">email_list_name</span><span class="p">:</span> <span class="s1">&#39;blog_list&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">respond_with</span> <span class="n">user</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>After:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">EmailListsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="n">respond_to</span> <span class="ss">:json</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="no">AddsUserToList</span><span class="o">.</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="n">params</span><span class="o">[</span><span class="ss">:username</span><span class="o">]</span><span class="p">,</span> <span class="n">email_list_name</span><span class="p">:</span> <span class="s1">&#39;blog_list&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">respond_with</span> <span class="n">user</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AddsUserToList</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">call</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">creates_user</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:creates_user</span><span class="p">)</span> <span class="p">{</span> <span class="no">User</span> <span class="p">}</span>
+</span><span class='line'>    <span class="n">notifies_user</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:notifies_user</span><span class="p">)</span> <span class="p">{</span> <span class="no">NotifiesUser</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">creates_user</span><span class="o">.</span><span class="n">find_or_create_by</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:username</span><span class="p">))</span><span class="o">.</span><span class="n">tap</span> <span class="k">do</span> <span class="o">|</span><span class="n">user</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">notifies_user</span><span class="o">.</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:email_list_name</span><span class="p">))</span>
+</span><span class='line'>      <span class="n">user</span><span class="o">.</span><span class="n">update_attributes</span><span class="p">(</span><span class="n">email_list_name</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:email_list_name</span><span class="p">))</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>The Tests</h2>
+
+<p>The class <code>AddsUserToList</code> can be tested using <em>true</em>, isolated unit tests: we can easily isolate the class under test and make sure it properly communicates with its collaborators. There is no database access, no heavy handed request stubbing and if we want to &ndash; no loading of the rails stack. In fact, I&rsquo;d argue that any test that requires any of the above is not a unit test, but rather an integration test (see entire repo <a href="https://github.com/orend/register">here</a>).</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">describe</span> <span class="no">AddsUserToList</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">let</span><span class="p">(</span><span class="ss">:creates_user</span><span class="p">)</span> <span class="p">{</span> <span class="n">double</span><span class="p">(</span><span class="s1">&#39;creates_user&#39;</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">let</span><span class="p">(</span><span class="ss">:notifies_user</span><span class="p">)</span> <span class="p">{</span> <span class="n">double</span><span class="p">(</span><span class="s1">&#39;notifies_user&#39;</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">let</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="p">{</span> <span class="n">double</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">subject</span><span class="p">(</span><span class="ss">:adds_user_to_list</span><span class="p">)</span> <span class="p">{</span> <span class="no">AddsUserToList</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s1">&#39;registers a new user&#39;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">creates_user</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">receive</span><span class="p">(</span><span class="ss">:find_or_create_by</span><span class="p">)</span><span class="o">.</span><span class="n">with</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="s1">&#39;username&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">notifies_user</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">receive</span><span class="p">(</span><span class="ss">:call</span><span class="p">)</span><span class="o">.</span><span class="n">with</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="s1">&#39;list_name&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">receive</span><span class="p">(</span><span class="ss">:update_attributes</span><span class="p">)</span><span class="o">.</span><span class="n">with</span><span class="p">(</span><span class="n">email_list_name</span><span class="p">:</span> <span class="s1">&#39;list_name&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">adds_user_to_list</span><span class="o">.</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="n">email_list_name</span><span class="p">:</span> <span class="s1">&#39;list_name&#39;</span><span class="p">,</span> <span class="n">creates_user</span><span class="p">:</span> <span class="n">creates_user</span><span class="p">,</span> <span class="n">notifies_user</span><span class="p">:</span> <span class="n">notifies_user</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Here we pass in mocks (doubles) for each collaborator and expect them to receive the correct messages. We do not assert any values &ndash; specifically not the value of <code>user.email_list_name</code>. Instead we require that <code>user</code> receives the <code>update_attributes</code> method. We need to <em>trust</em> <code>user</code> to update the attributes. After all, that&rsquo;s a unit test for <code>AddsUserToList</code>, not for <code>user</code>.</p>
+
+<p>As you can see there is a close resemblance between the test code and the code it is testing. I don&rsquo;t see it as a problem. A unit test should verify that the object under test sends the correct messages to its collaborators, and in the case of <code>AddsUserToList</code> we have a controller-like object, and a controller&rsquo;s job is to&hellip; coordinate sending messages between collaborators. Sandi Metz talks about what you should and what you shuold not test <a href="http://www.confreaks.com/videos/2452-railsconf2013-the-magic-tricks-of-testing">here</a>. To use her vocabulary, all we are testing here are outgoing command messages since these are the only messages this object sends. For that reason I think this resemblance is acceptable.</p>
+
+<p>I omit the integration (controller) tests here, but <a href="http://solnic.eu/2012/02/02/yes-you-should-write-controller-tests.html">please don&rsquo;t forget them</a> in your code. They will be much simpler and there will be fewer of them if you extract service objects.</p>
+
+<h2>Some Numbers</h2>
+
+<p>How much faster is this test from a unit test that touches the database and loads rails and the application? Here are the results:</p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th>               </th>
+<th align="center">  Single Test Runtime </th>
+<th align="center"> Total Suite Runtime  </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td> <strong>Before</strong>        </td>
+<td align="center">   0.0530s     </td>
+<td align="center">   2.5s |</td>
+</tr>
+<tr>
+<td></td>
+<td> <strong>After</strong>         </td>
+<td align="center">   0.0005s     </td>
+<td align="center">   0.4s |</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>A single test run is roughly <strong>a hundred times faster</strong>. The absolute times are rther small but the difference will be very noticeable when you have hundreds of unit tests or more. The total runtime in the &ldquo;before&rdquo; version takes roughly two seconds longer. This is the time it takes to load a trivial rails app on my machine. This will be significantly higher when the app grows in size and adds dependent gems.</p>
+
+<h2>Conclusion</h2>
+
+<p>The &lsquo;Before&rsquo; version&rsquo;s tests are harder to write and are significantly slower. It also bundles many responsibiilties into a single class, the Controller class. The &lsquo;After&rsquo; version is easier to test (we pass mocks to override the default classes). This means that in our code in <code>AddsUserToList</code> we can easily replace the collaborators with others if we need to, in case the requirements change. The controller has been reduced to performing the most basic task of collecting input and invoking the correct mehtods to excercise here.</p>
+
+<p>Is the &lsquo;After&rsquo; version better? I think it is. It&rsquo;s easier and faster to test, but even more importantly the collaborators are clearly defined and are treated as <em>roles</em>, not as specific implementations. As such, they can always be replaced by different implementations of the role they play. We now can concerate on the <em>messages</em> passing between the different <em>roles</em> in our system.</p>
+
+<p>When you practice TDD with mock objects you will almost be forced to inject your dependencies in order to mock collaborators. Extracting your business logic into service objects makes all this much easier, and further decoupling from active record makes the tests true unit tests that are also blazing fast.</p>
+
+<p>This brings us closer to a lofty design goal stated by Kent Beck:</p>
+
+<blockquote><p>&ldquo;When you can extend a system solely by adding new objects without modifying any existing objects, then you have a system that is flexible and cheap to maintain.&rdquo;</p></blockquote>
+
+
+
+</article>
+
+  <section class="comments">
+    <h2>Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+    <nav role="navigation" id="pagination">
+
+</nav>
+  </section>
+  
+
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'orensblog';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://re-factor.com/blog/2013/09/14/slow-tests-are-the-symptom-not-the-cause/';
+        var disqus_url = 'http://re-factor.com/blog/2013/09/14/slow-tests-are-the-symptom-not-the-cause/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = 'http://' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+</body>
+</html>
