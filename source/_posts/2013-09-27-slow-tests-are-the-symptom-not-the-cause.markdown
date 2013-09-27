@@ -4,7 +4,7 @@ title: "Slow Tests are the Symptom, not the Cause"
 date: 2013-09-27 10:02
 comments: true
 categories:
-published: false
+published: true
 ---
 
 If you have a slow test suite and you are asking yourself "how can I make my tests faster?" then you are asking the wrong question. Most chances are that you have bigger problems than just slow tests. The test slowness is merely the symptom; what you should really address is the cause. Once the real cause is addressed you will find that it's easy to write new fast tests and straightforward to refactor existing tests.
@@ -209,6 +209,8 @@ How much faster is this test from a unit test that touches the database and load
 | ------------- |:-------------:| :-----:|
 | **'false' unit test**        |   0.0530s     |   2.5s
 | **true unit test**         |   0.0005s     |   0.4s
+
+<br>
 
 A single test run is roughly **a hundred times faster**. The absolute times are rather small but the difference will be very noticeable when you have hundreds of unit tests or more. The total runtime in the "false" version takes roughly two seconds longer. This is the time it takes to load a trivial rails app on my machine. This will be significantly higher when the app grows in size and adds more gems.
 
