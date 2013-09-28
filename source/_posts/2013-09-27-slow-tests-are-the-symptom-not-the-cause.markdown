@@ -14,7 +14,7 @@ If you have a slow test suite and you are asking yourself "how can I make my tes
 
 It's surprising how quickly a rails app's test suite can become slow. It's important to understand the reason for this slowness early on and address the real cause behind it. In most cases the reason is excessive *coupling* between the domain objects themselves and coupling between these objects and the framework.
 
-In this refactoring walk-through we will see how small, incremental improvements to the design of the app, and specifically, *decoupling*, naturally lead to faster tests. We will extract service objects, completely remove all rails dependencies in test time and otherwise reduce the amount of coupling in the app.
+In this refactoring walk-through we will see how small, incremental improvements to the design of a rails app, and specifically, *decoupling*, naturally lead to faster tests. We will extract service objects, completely remove all rails dependencies in test time and otherwise reduce the amount of coupling in the app.
 
 Our goal is to have a simple, flexible and easy to maintain system in which objects can be replaced with other objects with minimal code changes. We will strive to achieve this goal and observe the effect of it on our tests speed.
 
