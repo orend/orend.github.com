@@ -8,6 +8,8 @@ published: true
 author: Oren Dobzinski
 ---
 
+**Update:** now using ruby 2.1's keyword arguments syntax
+
 If you have a slow test suite and you are asking yourself "how can I make my tests faster?" then you are asking the wrong question. Most chances are that you have bigger problems than just slow tests. The test slowness is merely the symptom; what you should really address is the cause. Once the real cause is addressed you will find that it's easy to write new fast tests and straightforward to refactor existing tests.
 
 <!-- more -->
@@ -115,7 +117,7 @@ The fact that we are specifying ```User``` as the default value of finds_user in
 Simplifying the Interface
 ----------------------------------
 
-The method ```AddsUserToList#run``` receives 4 arguments. Users of this method need to know the *order* of the list. Also, it is likely that over time you'd discover you need to add more arguments. When this happens you will need to update all users of the method. A more flexible solution is to use a hash of arguments. This will make the interface more stable and ensure the number of arguments does not grow when we find that we need to add more arguments. It will also make refactoring a little easier, which is important. I often find that for many classes I end up changing from an argument list to a hash of options at some point, so why not [use it in the first place](http://www.poodr.com/)? But does it mean that we need to give up the advantages of deferred evaluation of the default values? Not at all.
+The method ```AddsUserToList#run``` receives 4 arguments. Users of this method need to know the *order* of the list. Also, it is likely that over time you'd discover you need to add more arguments. When this happens you will need to update all users of the method. A more flexible solution is to use a hash of arguments. This will make the interface more stable and ensure the number of arguments does not grow when we find that we need to add more arguments. It will also make refactoring a little easier, which is important. I often find that for many classes I end up changing from an argument list to a hash of arguments at some point, so why not [use it in the first place](http://www.poodr.com/)? But does it mean that we need to give up the advantages of deferred evaluation of the default values? Not at all.
 
 We will use ```Hash#fetch```, passing a block to it, which will not get evaluated unless the queried key is absent. In our tests, the code in the block to ```fetch``` will never get evaluated, and ```User``` won't get loaded. Also, when specifying the defaults in the argument list it is not possible to evaluate more than one statement, but we can do it using ```Hash#fetch```.
 
@@ -134,6 +136,26 @@ class AddsUserToList
   end
 end
 ```
+
+Using Ruby 2.1's Keyword Arguments Syntax
+-------------------
+
+We can get the same exact functionality by using ruby's 2.1's keyword argument syntax. See how much less verbose this version is:
+
+```ruby
+class AddsUserToList
+  def self.call(username:, email_list_name:,
+    finds_user: User, notifies_user: NotifiesUser)
+
+    finds_user.find_by!(username: username)
+    notifies_user.(user, mailing_list_name)
+    user.update_attributes(mailing_list_name: mailing_list_name)
+    user
+  end
+end
+```
+
+Note that ```username``` and ```email_list_name``` are required named arguments, and will raise an ```ArgumentError``` if not passed in (this is not available even in ruby version 2.0), whereas the other arguments will get the specified default value (evaluated and) assigned to them if not passed in.
 
 The end result looks like this:
 
@@ -164,13 +186,12 @@ end
 ```
 ```ruby
 class AddsUserToList
-  def self.call(args)
-    finds_user = args.fetch(:finds_user) { User }
-    notifies_user = args.fetch(:notifies_user) { NotifiesUser }
+  def self.call(username:, email_list_name:,
+    finds_user: User, notifies_user: NotifiesUser)
 
-    finds_user.find_by!(username: args.fetch(:username))
-    notifies_user.(user, args.fetch(:mailing_list_name))
-    user.update_attributes(mailing_list_name: args.fetch(:mailing_list_name))
+    finds_user.find_by!(username: username)
+    notifies_user.(user, mailing_list_name)
+    user.update_attributes(mailing_list_name: mailing_list_name)
     user
   end
 end
@@ -199,6 +220,8 @@ end
 Here we pass in mocks (initialized with ```#double```) for each collaborator and expect them to receive the correct messages. We do not assert any values - specifically not the value of ```user.mailing_list_name```. Instead we require that ```user``` receives the ```update_attributes``` method. We need to *trust* ```user``` to update the attributes. After all, that's a unit test for ```AddsUserToList```, not for ```user```.
 
 As you can see there is a close resemblance between the test code and the code it is testing. I don't see it as a problem. A unit test should verify that the object under test sends the correct messages to its collaborators, and in the case of ```AddsUserToList``` we have a controller-like object, and a controller's job is to... coordinate sending messages between collaborators. Sandi Metz talks about what you should and what you should not test [here](http://www.confreaks.com/videos/2452-railsconf2013-the-magic-tricks-of-testing). To use her vocabulary, all we are testing here are outgoing command messages since these are the only messages this object sends. For that reason I think the resemblance is acceptable.
+
+I should mention that TDD classicists have long criticized TDD mockists (as myself) for writing tests that are too coupled to the implementation. You can read more about it in Martin Fowler's [Mocks Aren't Stubs](http://martinfowler.com/articles/mocksArentStubs.html).
 
 I omit the controller and integration tests here, but [please don't forget them](http://solnic.eu/2012/02/02/yes-you-should-write-controller-tests.html) in your code. They will be much simpler and there will be fewer of them if you extract service objects.
 
@@ -235,5 +258,5 @@ P.S., if you found this post useful be sure to sign up for the [newsletter](http
 
 <hr>
 
-I'd like to thank the following people for providing useful feedback about this post: Frazer Horn, Steve Klabnik, Peter Marreck, Susan Potter and Piotr Solnica.
+I'd like to thank the following people for providing useful feedback about this post: James Edward Gray II, Frazer Horn, Steve Klabnik, Peter Marreck, Susan Potter and Piotr Solnica.
 
