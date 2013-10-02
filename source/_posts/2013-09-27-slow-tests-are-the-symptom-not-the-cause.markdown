@@ -8,7 +8,7 @@ published: true
 author: Oren Dobzinski
 ---
 
-**Update:** now using ruby 2.1's keyword arguments syntax
+**Update:** now using [ruby 2.1's keyword arguments syntax](#keyword-arguments). Also added a [refactoring step](#one-level).
 
 If you have a slow test suite and you are asking yourself "how can I make my tests faster?" then you are asking the wrong question. Most chances are that you have bigger problems than just slow tests. The test slowness is merely the symptom; what you should really address is the cause. Once the real cause is addressed you will find that it's easy to write new fast tests and straightforward to refactor existing tests.
 
@@ -137,25 +137,51 @@ class AddsUserToList
 end
 ```
 
-Using Ruby 2.1's Keyword Arguments Syntax
+<a id="keyword-arguments">Using Ruby 2.1's Keyword Arguments Syntax
 -------------------
 
 We can get the same exact functionality by using ruby's 2.1's keyword argument syntax. See how much less verbose this version is:
 
 ```ruby
 class AddsUserToList
-  def self.call(username:, email_list_name:,
-    finds_user: User, notifies_user: NotifiesUser)
-
-    finds_user.find_by!(username: username)
+  def self.call(username:, mailing_list_name:, finds_user: User,
+                notifies_user: NotifiesUser)
+    user = finds_user.find_by_username!(username)
     notifies_user.(user, mailing_list_name)
-    user.update_attributes(mailing_list_name: mailing_list_name)
+    user.add_to_mailing_list(mailing_list_name)
     user
   end
 end
 ```
 
-Note that ```username``` and ```email_list_name``` are required named arguments, and will raise an ```ArgumentError``` if not passed in (this is not available even in ruby version 2.0), whereas the other arguments will get the specified default value (evaluated and) assigned to them if not passed in.
+Note that ```username``` and ```mailing_list_name``` are required named arguments, and will raise an ```ArgumentError``` if not passed in (this is not available even in ruby version 2.0), whereas the other arguments will get the specified default value (evaluated and) assigned to them if not passed in.
+
+<a id="one-level"></a>Using One Level of Abstraction Per Method
+-------------------------------------
+
+There is still something that doesn't feel quite right. Consider [Kent Beck's advice](http://www.amazon.com/Smalltalk-Best-Practice-Patterns-Kent/dp/013476904X):
+
+> "Divide your program into methods that perform one identifiable task. Keep all of the operations in a method at the same level of abstraction.""
+
+The ```call``` method invokes a few other methods, but these methods operate on different levels of abstractions: notifying a user is a domain-level concept, whereas updating a user's attributes is a lower-level, persistence related concept. Another way to put it: while the details of how exactly the user is going to be notified are hidden, the details of updating the attributes are exposed. The fact that active record gives us multiple ways of updating attributes makes this problem even clearer: what if we wanted to update attributes using accessors and save using active record's ```save```? These details are irrelevant at the abstraction level of the method we're in and the method should not change if they do. ```notifies_user``` is treated as a role, while user is wrongly treated as the active record's implementation of a user role.
+
+The call to ```find_by!``` also operates on a lower level than ```notifis_user```'s, similarly to the case of ```update_attributes```. In order to fix these problems we create an instance method and a class method in ``User``:
+
+```ruby
+class User < ActiveRecord::Base
+  validates_uniqueness_of :username
+
+  def add_to_mailing_list(list_name)
+    update_attributes(mailing_list_name: list_name)
+  end
+
+  def self.find_by_username!(username)
+    find_by!(username: username)
+  end
+end
+```
+
+The specific query to find the user or the specific active record used are now ```User```'s business. We achieved further decoupling from active record and made sure the abstraction level is right. If we keep using our own methods instead of active record's we've effectively made persistence and object lookup an implementation detail that's the concern of the model only.
 
 The end result looks like this:
 
@@ -186,12 +212,11 @@ end
 ```
 ```ruby
 class AddsUserToList
-  def self.call(username:, email_list_name:,
-    finds_user: User, notifies_user: NotifiesUser)
-
-    finds_user.find_by!(username: username)
+  def self.call(username:, mailing_list_name:, finds_user: User,
+                notifies_user: NotifiesUser)
+    user = finds_user.find_by_username!(username)
     notifies_user.(user, mailing_list_name)
-    user.update_attributes(mailing_list_name: mailing_list_name)
+    user.add_to_mailing_list(mailing_list_name)
     user
   end
 end
@@ -208,16 +233,18 @@ describe AddsUserToList do
   subject(:adds_user_to_list) { AddsUserToList }
 
   it 'registers a new user' do
-    expect(finds_user).to receive(:find_by!).with(username: 'username').and_return(user)
+    expect(finds_user).to receive(:find_by_username!).with('username').and_return(user)
     expect(notifies_user).to receive(:call).with(user, 'list_name')
-    expect(user).to receive(:update_attributes).with(mailing_list_name: 'list_name')
+    expect(user).to receive(:add_to_mailing_list).with('list_name')
 
     adds_user_to_list.(username: 'username', mailing_list_name: 'list_name', finds_user: finds_user, notifies_user: notifies_user)
   end
 end
 ```
 
-Here we pass in mocks (initialized with ```#double```) for each collaborator and expect them to receive the correct messages. We do not assert any values - specifically not the value of ```user.mailing_list_name```. Instead we require that ```user``` receives the ```update_attributes``` method. We need to *trust* ```user``` to update the attributes. After all, that's a unit test for ```AddsUserToList```, not for ```user```.
+Here we pass in mocks (initialized with ```#double```) for each collaborator and expect them to receive the correct messages. We do not assert any values - specifically not the value of ```user.mailing_list_name```. Instead we require that ```user``` receives the ```add_to_mailing_list``` message. We need to *trust* ```user``` to update the attributes. After all, that's a unit test for ```AddsUserToList```, not for ```user```.
+
+Note that the fact that we pushed ```update_attributes``` to ```User``` helps us avoid a mocking pitfall: you need to [only mock types you own](http://www.amazon.com/Growing-Object-Oriented-Software-Guided-Tests/dp/0321503627). Technically we do own ```User```, but most of its interface is coming down the inheritance tree from ```ActiveRecord::Base```, which we don't own. There is no design feedback when you mock parts of the interface you don't own. Or rather - you do get feedback but you can't act on it.
 
 As you can see there is a close resemblance between the test code and the code it is testing. I don't see it as a problem. A unit test should verify that the object under test sends the correct messages to its collaborators, and in the case of ```AddsUserToList``` we have a controller-like object, and a controller's job is to... coordinate sending messages between collaborators. Sandi Metz talks about what you should and what you should not test [here](http://www.confreaks.com/videos/2452-railsconf2013-the-magic-tricks-of-testing). To use her vocabulary, all we are testing here are outgoing command messages since these are the only messages this object sends. For that reason I think the resemblance is acceptable.
 
@@ -244,7 +271,7 @@ Conclusion
 
 The 'before' version's tests are harder to write and are significantly slower since we bundle many responsibilities into a single class, the controller class. The 'After' version is easier to test (we pass mocks to override the default classes). This means that in our code in ```AddsUserToList``` we can easily replace the collaborators with other implementations in case the requirements change and require no or little code change. The controller has been reduced to performing the most basic task of coordination between a few objects.
 
-Is the 'After' version better? I think it is. It's easier and faster to test, but even more importantly the collaborators are clearly defined and are treated as *roles*, not as specific implementations. As such, they can always be replaced by different implementations of the role they play. We now can concentrate on the *messages* passing between the different *roles* in our system.
+Is the 'After' version better? I think it is. It's easier and faster to test, but more importantly the collaborators are clearly defined and are treated as *roles*, not as specific implementations. As such, they can always be replaced by different implementations of the role they play. We now can concentrate on the *messages* passing between the different *roles* in our system.
 
 When you practice TDD with mock objects you will almost be forced to inject your dependencies in order to mock collaborators. Extracting your business logic into service objects makes all this much easier, and further decoupling from active record makes the tests true unit tests that are also blazing fast.
 
