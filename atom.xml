@@ -4,7 +4,7 @@
   <title><![CDATA[Re-factor]]></title>
   <link href="http://re-factor.com/atom.xml" rel="self"/>
   <link href="http://re-factor.com/"/>
-  <updated>2013-09-27T22:33:19-04:00</updated>
+  <updated>2013-10-01T23:06:10-04:00</updated>
   <id>http://re-factor.com/</id>
   <author>
     <name><![CDATA[Oren Dobzinski]]></name>
@@ -18,7 +18,9 @@
     <link href="http://re-factor.com/blog/2013/09/27/slow-tests-are-the-symptom-not-the-cause/"/>
     <updated>2013-09-27T10:02:00-04:00</updated>
     <id>http://re-factor.com/blog/2013/09/27/slow-tests-are-the-symptom-not-the-cause</id>
-    <content type="html"><![CDATA[<p>If you have a slow test suite and you are asking yourself &ldquo;how can I make my tests faster?&rdquo; then you are asking the wrong question. Most chances are that you have bigger problems than just slow tests. The test slowness is merely the symptom; what you should really address is the cause. Once the real cause is addressed you will find that it&rsquo;s easy to write new fast tests and straightforward to refactor existing tests.</p>
+    <content type="html"><![CDATA[<p><strong>Update:</strong> now using ruby 2.1&rsquo;s keyword arguments syntax</p>
+
+<p>If you have a slow test suite and you are asking yourself &ldquo;how can I make my tests faster?&rdquo; then you are asking the wrong question. Most chances are that you have bigger problems than just slow tests. The test slowness is merely the symptom; what you should really address is the cause. Once the real cause is addressed you will find that it&rsquo;s easy to write new fast tests and straightforward to refactor existing tests.</p>
 
 <!-- more -->
 
@@ -179,7 +181,7 @@ This is an improvement, but hard-coding the name of the class of your collaborat
 
 <h2>Simplifying the Interface</h2>
 
-<p>The method <code>AddsUserToList#run</code> receives 4 arguments. Users of this method need to know the <em>order</em> of the list. Also, it is likely that over time you&rsquo;d discover you need to add more arguments. When this happens you will need to update all users of the method. A more flexible solution is to use a hash of arguments. This will make the interface more stable and ensure the number of arguments does not grow when we find that we need to add more arguments. It will also make refactoring a little easier, which is important. I often find that for many classes I end up changing from an argument list to a hash of options at some point, so why not <a href="http://www.poodr.com/">use it in the first place</a>? But does it mean that we need to give up the advantages of deferred evaluation of the default values? Not at all.</p>
+<p>The method <code>AddsUserToList#run</code> receives 4 arguments. Users of this method need to know the <em>order</em> of the list. Also, it is likely that over time you&rsquo;d discover you need to add more arguments. When this happens you will need to update all users of the method. A more flexible solution is to use a hash of arguments. This will make the interface more stable and ensure the number of arguments does not grow when we find that we need to add more arguments. It will also make refactoring a little easier, which is important. I often find that for many classes I end up changing from an argument list to a hash of arguments at some point, so why not <a href="http://www.poodr.com/">use it in the first place</a>? But does it mean that we need to give up the advantages of deferred evaluation of the default values? Not at all.</p>
 
 <p>We will use <code>Hash#fetch</code>, passing a block to it, which will not get evaluated unless the queried key is absent. In our tests, the code in the block to <code>fetch</code> will never get evaluated, and <code>User</code> won&rsquo;t get loaded. Also, when specifying the defaults in the argument list it is not possible to evaluate more than one statement, but we can do it using <code>Hash#fetch</code>.</p>
 
@@ -209,6 +211,35 @@ This is an improvement, but hard-coding the name of the class of your collaborat
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
+
+<h2>Using Ruby 2.1&rsquo;s Keyword Arguments Syntax</h2>
+
+<p>We can get the same exact functionality by using ruby&rsquo;s 2.1&rsquo;s keyword argument syntax. See how much less verbose this version is:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AddsUserToList</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">call</span><span class="p">(</span><span class="ss">username</span><span class="p">:,</span> <span class="n">email_list_name</span><span class="p">:,</span>
+</span><span class='line'>    <span class="n">finds_user</span><span class="p">:</span> <span class="no">User</span><span class="p">,</span> <span class="n">notifies_user</span><span class="p">:</span> <span class="no">NotifiesUser</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">finds_user</span><span class="o">.</span><span class="n">find_by!</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="n">username</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">notifies_user</span><span class="o">.</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">mailing_list_name</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span><span class="o">.</span><span class="n">update_attributes</span><span class="p">(</span><span class="n">mailing_list_name</span><span class="p">:</span> <span class="n">mailing_list_name</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Note that <code>username</code> and <code>email_list_name</code> are required named arguments, and will raise an <code>ArgumentError</code> if not passed in (this is not available even in ruby version 2.0), whereas the other arguments will get the specified default value (evaluated and) assigned to them if not passed in.</p>
 
 <p>The end result looks like this:</p>
 
@@ -266,15 +297,13 @@ This is an improvement, but hard-coding the name of the class of your collaborat
 <span class='line-number'>8</span>
 <span class='line-number'>9</span>
 <span class='line-number'>10</span>
-<span class='line-number'>11</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AddsUserToList</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">call</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">finds_user</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:finds_user</span><span class="p">)</span> <span class="p">{</span> <span class="no">User</span> <span class="p">}</span>
-</span><span class='line'>    <span class="n">notifies_user</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:notifies_user</span><span class="p">)</span> <span class="p">{</span> <span class="no">NotifiesUser</span> <span class="p">}</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">call</span><span class="p">(</span><span class="ss">username</span><span class="p">:,</span> <span class="n">email_list_name</span><span class="p">:,</span>
+</span><span class='line'>    <span class="n">finds_user</span><span class="p">:</span> <span class="no">User</span><span class="p">,</span> <span class="n">notifies_user</span><span class="p">:</span> <span class="no">NotifiesUser</span><span class="p">)</span>
 </span><span class='line'>
-</span><span class='line'>    <span class="n">finds_user</span><span class="o">.</span><span class="n">find_by!</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:username</span><span class="p">))</span>
-</span><span class='line'>    <span class="n">notifies_user</span><span class="o">.</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:mailing_list_name</span><span class="p">))</span>
-</span><span class='line'>    <span class="n">user</span><span class="o">.</span><span class="n">update_attributes</span><span class="p">(</span><span class="n">mailing_list_name</span><span class="p">:</span> <span class="n">args</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:mailing_list_name</span><span class="p">))</span>
+</span><span class='line'>    <span class="n">finds_user</span><span class="o">.</span><span class="n">find_by!</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="n">username</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">notifies_user</span><span class="o">.</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">mailing_list_name</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span><span class="o">.</span><span class="n">update_attributes</span><span class="p">(</span><span class="n">mailing_list_name</span><span class="p">:</span> <span class="n">mailing_list_name</span><span class="p">)</span>
 </span><span class='line'>    <span class="n">user</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
@@ -319,6 +348,8 @@ This is an improvement, but hard-coding the name of the class of your collaborat
 <p>Here we pass in mocks (initialized with <code>#double</code>) for each collaborator and expect them to receive the correct messages. We do not assert any values &ndash; specifically not the value of <code>user.mailing_list_name</code>. Instead we require that <code>user</code> receives the <code>update_attributes</code> method. We need to <em>trust</em> <code>user</code> to update the attributes. After all, that&rsquo;s a unit test for <code>AddsUserToList</code>, not for <code>user</code>.</p>
 
 <p>As you can see there is a close resemblance between the test code and the code it is testing. I don&rsquo;t see it as a problem. A unit test should verify that the object under test sends the correct messages to its collaborators, and in the case of <code>AddsUserToList</code> we have a controller-like object, and a controller&rsquo;s job is to&hellip; coordinate sending messages between collaborators. Sandi Metz talks about what you should and what you should not test <a href="http://www.confreaks.com/videos/2452-railsconf2013-the-magic-tricks-of-testing">here</a>. To use her vocabulary, all we are testing here are outgoing command messages since these are the only messages this object sends. For that reason I think the resemblance is acceptable.</p>
+
+<p>I should mention that TDD classicists have long criticized TDD mockists (as myself) for writing tests that are too coupled to the implementation. You can read more about it in Martin Fowler&rsquo;s <a href="http://martinfowler.com/articles/mocksArentStubs.html">Mocks Aren&rsquo;t Stubs</a>.</p>
 
 <p>I omit the controller and integration tests here, but <a href="http://solnic.eu/2012/02/02/yes-you-should-write-controller-tests.html">please don&rsquo;t forget them</a> in your code. They will be much simpler and there will be fewer of them if you extract service objects.</p>
 
@@ -376,7 +407,7 @@ This is an improvement, but hard-coding the name of the class of your collaborat
 <hr>
 
 
-<p>I&rsquo;d like to thank the following people for providing useful feedback about this post: Frazer Horn, Steve Klabnik, Peter Marreck, Susan Potter and Piotr Solnica.</p>
+<p>I&rsquo;d like to thank the following people for providing useful feedback about this post: James Edward Gray II, Frazer Horn, Steve Klabnik, Peter Marreck, Susan Potter and Piotr Solnica.</p>
 ]]></content>
   </entry>
   
