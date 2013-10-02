@@ -157,7 +157,7 @@
   </header>
 
 
-<p><strong>Update:</strong> now using ruby 2.1&rsquo;s keyword arguments syntax</p>
+<p><strong>Update:</strong> now using <a href="#keyword-arguments">ruby 2.1&rsquo;s keyword arguments syntax</a>. Also added a <a href="#one-level">refactoring step</a>.</p>
 
 <p>If you have a slow test suite and you are asking yourself &ldquo;how can I make my tests faster?&rdquo; then you are asking the wrong question. Most chances are that you have bigger problems than just slow tests. The test slowness is merely the symptom; what you should really address is the cause. Once the real cause is addressed you will find that it&rsquo;s easy to write new fast tests and straightforward to refactor existing tests.</p>
 
@@ -351,7 +351,7 @@ This is an improvement, but hard-coding the name of the class of your collaborat
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h2>Using Ruby 2.1&rsquo;s Keyword Arguments Syntax</h2>
+<h2><a id="keyword-arguments">Using Ruby 2.1&rsquo;s Keyword Arguments Syntax</h2>
 
 <p>We can get the same exact functionality by using ruby&rsquo;s 2.1&rsquo;s keyword argument syntax. See how much less verbose this version is:</p>
 
@@ -364,21 +364,56 @@ This is an improvement, but hard-coding the name of the class of your collaborat
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
 <span class='line-number'>9</span>
-<span class='line-number'>10</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AddsUserToList</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">call</span><span class="p">(</span><span class="ss">username</span><span class="p">:,</span> <span class="n">email_list_name</span><span class="p">:,</span>
-</span><span class='line'>    <span class="n">finds_user</span><span class="p">:</span> <span class="no">User</span><span class="p">,</span> <span class="n">notifies_user</span><span class="p">:</span> <span class="no">NotifiesUser</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">finds_user</span><span class="o">.</span><span class="n">find_by!</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="n">username</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">call</span><span class="p">(</span><span class="ss">username</span><span class="p">:,</span> <span class="n">mailing_list_name</span><span class="p">:,</span> <span class="n">finds_user</span><span class="p">:</span> <span class="no">User</span><span class="p">,</span>
+</span><span class='line'>                <span class="n">notifies_user</span><span class="p">:</span> <span class="no">NotifiesUser</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="n">finds_user</span><span class="o">.</span><span class="n">find_by_username!</span><span class="p">(</span><span class="n">username</span><span class="p">)</span>
 </span><span class='line'>    <span class="n">notifies_user</span><span class="o">.</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">mailing_list_name</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">user</span><span class="o">.</span><span class="n">update_attributes</span><span class="p">(</span><span class="n">mailing_list_name</span><span class="p">:</span> <span class="n">mailing_list_name</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span><span class="o">.</span><span class="n">add_to_mailing_list</span><span class="p">(</span><span class="n">mailing_list_name</span><span class="p">)</span>
 </span><span class='line'>    <span class="n">user</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Note that <code>username</code> and <code>email_list_name</code> are required named arguments, and will raise an <code>ArgumentError</code> if not passed in (this is not available even in ruby version 2.0), whereas the other arguments will get the specified default value (evaluated and) assigned to them if not passed in.</p>
+<p>Note that <code>username</code> and <code>mailing_list_name</code> are required named arguments, and will raise an <code>ArgumentError</code> if not passed in (this is not available even in ruby version 2.0), whereas the other arguments will get the specified default value (evaluated and) assigned to them if not passed in.</p>
+
+<h2><a id="one-level"></a>Using One Level of Abstraction Per Method</h2>
+
+<p>There is still something that doesn&rsquo;t feel quite right. Consider <a href="http://www.amazon.com/Smalltalk-Best-Practice-Patterns-Kent/dp/013476904X">Kent Beck&rsquo;s advice</a>:</p>
+
+<blockquote><p>&ldquo;Divide your program into methods that perform one identifiable task. Keep all of the operations in a method at the same level of abstraction.&rdquo;&#8221;</p></blockquote>
+
+<p>The <code>call</code> method invokes a few other methods, but these methods operate on different levels of abstractions: notifying a user is a domain-level concept, whereas updating a user&rsquo;s attributes is a lower-level, persistence related concept. Another way to put it: while the details of how exactly the user is going to be notified are hidden, the details of updating the attributes are exposed. The fact that active record gives us multiple ways of updating attributes makes this problem even clearer: what if we wanted to update attributes using accessors and save using active record&rsquo;s <code>save</code>? These details are irrelevant at the abstraction level of the method we&rsquo;re in and the method should not change if they do. <code>notifies_user</code> is treated as a role, while user is wrongly treated as the active record&rsquo;s implementation of a user role.</p>
+
+<p>The call to <code>find_by!</code> also operates on a lower level than <code>notifis_user</code>&rsquo;s, similarly to the case of <code>update_attributes</code>. In order to fix these problems we create an instance method and a class method in <code>User</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
+</span><span class='line'>  <span class="n">validates_uniqueness_of</span> <span class="ss">:username</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">add_to_mailing_list</span><span class="p">(</span><span class="n">list_name</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">update_attributes</span><span class="p">(</span><span class="n">mailing_list_name</span><span class="p">:</span> <span class="n">list_name</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">find_by_username!</span><span class="p">(</span><span class="n">username</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">find_by!</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="n">username</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The specific query to find the user or the specific active record used are now <code>User</code>&rsquo;s business. We achieved further decoupling from active record and made sure the abstraction level is right. If we keep using our own methods instead of active record&rsquo;s we&rsquo;ve effectively made persistence and object lookup an implementation detail that&rsquo;s the concern of the model only.</p>
 
 <p>The end result looks like this:</p>
 
@@ -435,14 +470,12 @@ This is an improvement, but hard-coding the name of the class of your collaborat
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
 <span class='line-number'>9</span>
-<span class='line-number'>10</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AddsUserToList</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">call</span><span class="p">(</span><span class="ss">username</span><span class="p">:,</span> <span class="n">email_list_name</span><span class="p">:,</span>
-</span><span class='line'>    <span class="n">finds_user</span><span class="p">:</span> <span class="no">User</span><span class="p">,</span> <span class="n">notifies_user</span><span class="p">:</span> <span class="no">NotifiesUser</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">finds_user</span><span class="o">.</span><span class="n">find_by!</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="n">username</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">call</span><span class="p">(</span><span class="ss">username</span><span class="p">:,</span> <span class="n">mailing_list_name</span><span class="p">:,</span> <span class="n">finds_user</span><span class="p">:</span> <span class="no">User</span><span class="p">,</span>
+</span><span class='line'>                <span class="n">notifies_user</span><span class="p">:</span> <span class="no">NotifiesUser</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span> <span class="o">=</span> <span class="n">finds_user</span><span class="o">.</span><span class="n">find_by_username!</span><span class="p">(</span><span class="n">username</span><span class="p">)</span>
 </span><span class='line'>    <span class="n">notifies_user</span><span class="o">.</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">mailing_list_name</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">user</span><span class="o">.</span><span class="n">update_attributes</span><span class="p">(</span><span class="n">mailing_list_name</span><span class="p">:</span> <span class="n">mailing_list_name</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">user</span><span class="o">.</span><span class="n">add_to_mailing_list</span><span class="p">(</span><span class="n">mailing_list_name</span><span class="p">)</span>
 </span><span class='line'>    <span class="n">user</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
@@ -474,9 +507,9 @@ This is an improvement, but hard-coding the name of the class of your collaborat
 </span><span class='line'>  <span class="n">subject</span><span class="p">(</span><span class="ss">:adds_user_to_list</span><span class="p">)</span> <span class="p">{</span> <span class="no">AddsUserToList</span> <span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="n">it</span> <span class="s1">&#39;registers a new user&#39;</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">finds_user</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">receive</span><span class="p">(</span><span class="ss">:find_by!</span><span class="p">)</span><span class="o">.</span><span class="n">with</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="s1">&#39;username&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">finds_user</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">receive</span><span class="p">(</span><span class="ss">:find_by_username!</span><span class="p">)</span><span class="o">.</span><span class="n">with</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
 </span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">notifies_user</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">receive</span><span class="p">(</span><span class="ss">:call</span><span class="p">)</span><span class="o">.</span><span class="n">with</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="s1">&#39;list_name&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">receive</span><span class="p">(</span><span class="ss">:update_attributes</span><span class="p">)</span><span class="o">.</span><span class="n">with</span><span class="p">(</span><span class="n">mailing_list_name</span><span class="p">:</span> <span class="s1">&#39;list_name&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">receive</span><span class="p">(</span><span class="ss">:add_to_mailing_list</span><span class="p">)</span><span class="o">.</span><span class="n">with</span><span class="p">(</span><span class="s1">&#39;list_name&#39;</span><span class="p">)</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="n">adds_user_to_list</span><span class="o">.</span><span class="p">(</span><span class="ss">username</span><span class="p">:</span> <span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="n">mailing_list_name</span><span class="p">:</span> <span class="s1">&#39;list_name&#39;</span><span class="p">,</span> <span class="n">finds_user</span><span class="p">:</span> <span class="n">finds_user</span><span class="p">,</span> <span class="n">notifies_user</span><span class="p">:</span> <span class="n">notifies_user</span><span class="p">)</span>
 </span><span class='line'>  <span class="k">end</span>
@@ -484,7 +517,9 @@ This is an improvement, but hard-coding the name of the class of your collaborat
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>Here we pass in mocks (initialized with <code>#double</code>) for each collaborator and expect them to receive the correct messages. We do not assert any values &ndash; specifically not the value of <code>user.mailing_list_name</code>. Instead we require that <code>user</code> receives the <code>update_attributes</code> method. We need to <em>trust</em> <code>user</code> to update the attributes. After all, that&rsquo;s a unit test for <code>AddsUserToList</code>, not for <code>user</code>.</p>
+<p>Here we pass in mocks (initialized with <code>#double</code>) for each collaborator and expect them to receive the correct messages. We do not assert any values &ndash; specifically not the value of <code>user.mailing_list_name</code>. Instead we require that <code>user</code> receives the <code>add_to_mailing_list</code> message. We need to <em>trust</em> <code>user</code> to update the attributes. After all, that&rsquo;s a unit test for <code>AddsUserToList</code>, not for <code>user</code>.</p>
+
+<p>Note that the fact that we pushed <code>update_attributes</code> to <code>User</code> helps us avoid a mocking pitfall: you need to <a href="http://www.amazon.com/Growing-Object-Oriented-Software-Guided-Tests/dp/0321503627">only mock types you own</a>. Technically we do own <code>User</code>, but most of its interface is coming down the inheritance tree from <code>ActiveRecord::Base</code>, which we don&rsquo;t own. There is no design feedback when you mock parts of the interface you don&rsquo;t own. Or rather &ndash; you do get feedback but you can&rsquo;t act on it.</p>
 
 <p>As you can see there is a close resemblance between the test code and the code it is testing. I don&rsquo;t see it as a problem. A unit test should verify that the object under test sends the correct messages to its collaborators, and in the case of <code>AddsUserToList</code> we have a controller-like object, and a controller&rsquo;s job is to&hellip; coordinate sending messages between collaborators. Sandi Metz talks about what you should and what you should not test <a href="http://www.confreaks.com/videos/2452-railsconf2013-the-magic-tricks-of-testing">here</a>. To use her vocabulary, all we are testing here are outgoing command messages since these are the only messages this object sends. For that reason I think the resemblance is acceptable.</p>
 
@@ -531,7 +566,7 @@ This is an improvement, but hard-coding the name of the class of your collaborat
 
 <p>The &lsquo;before&rsquo; version&rsquo;s tests are harder to write and are significantly slower since we bundle many responsibilities into a single class, the controller class. The &lsquo;After&rsquo; version is easier to test (we pass mocks to override the default classes). This means that in our code in <code>AddsUserToList</code> we can easily replace the collaborators with other implementations in case the requirements change and require no or little code change. The controller has been reduced to performing the most basic task of coordination between a few objects.</p>
 
-<p>Is the &lsquo;After&rsquo; version better? I think it is. It&rsquo;s easier and faster to test, but even more importantly the collaborators are clearly defined and are treated as <em>roles</em>, not as specific implementations. As such, they can always be replaced by different implementations of the role they play. We now can concentrate on the <em>messages</em> passing between the different <em>roles</em> in our system.</p>
+<p>Is the &lsquo;After&rsquo; version better? I think it is. It&rsquo;s easier and faster to test, but more importantly the collaborators are clearly defined and are treated as <em>roles</em>, not as specific implementations. As such, they can always be replaced by different implementations of the role they play. We now can concentrate on the <em>messages</em> passing between the different <em>roles</em> in our system.</p>
 
 <p>When you practice TDD with mock objects you will almost be forced to inject your dependencies in order to mock collaborators. Extracting your business logic into service objects makes all this much easier, and further decoupling from active record makes the tests true unit tests that are also blazing fast.</p>
 
