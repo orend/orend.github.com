@@ -161,7 +161,7 @@ Note that ```username``` and ```mailing_list_name``` are required named argument
 
 There is still something that doesn't feel quite right. Consider [Kent Beck's advice](http://www.amazon.com/Smalltalk-Best-Practice-Patterns-Kent/dp/013476904X):
 
-> "Divide your program into methods that perform one identifiable task. Keep all of the operations in a method at the same level of abstraction.""
+> Divide your program into methods that perform one identifiable task. Keep all of the operations in a method at the same level of abstraction.
 
 The ```call``` method invokes a few other methods, but these methods operate on different levels of abstractions: notifying a user is a domain-level concept, whereas updating a user's attributes is a lower-level, persistence related concept. Another way to put it: while the details of how exactly the user is going to be notified are hidden, the details of updating the attributes are exposed. The fact that active record gives us multiple ways of updating attributes makes this problem even clearer: what if we wanted to update attributes using accessors and save using active record's ```save```? These details are irrelevant at the abstraction level of the method we're in and the method should not change if they do. ```notifies_user``` is treated as a role, while user is wrongly treated as the active record's implementation of a user role.
 
@@ -277,7 +277,7 @@ When you practice TDD with mock objects you will almost be forced to inject your
 
 This brings us closer to a lofty design goal stated by Kent Beck:
 
->"When you can extend a system solely by adding new objects without modifying any existing objects, then you have a system that is flexible and cheap to maintain."
+>When you can extend a system solely by adding new objects without modifying any existing objects, then you have a system that is flexible and cheap to maintain.
 
 Using mocks and dependency injection with TDD makes sure your system is designed for this form of modularity from the get go. You know you can replace your objects with a different implementation because this is exactly what you did in your tests when you passed in mocks. Such design guarantees that you can write true, isolated and thus fast, tests.
 
