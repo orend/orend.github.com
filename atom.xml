@@ -4,7 +4,7 @@
   <title><![CDATA[Re-factor]]></title>
   <link href="http://re-factor.com/atom.xml" rel="self"/>
   <link href="http://re-factor.com/"/>
-  <updated>2013-10-06T22:35:17-04:00</updated>
+  <updated>2013-10-06T22:37:10-04:00</updated>
   <id>http://re-factor.com/</id>
   <author>
     <name><![CDATA[Oren Dobzinski]]></name>
@@ -243,7 +243,7 @@ This is an improvement, but hard-coding the name of the class of your collaborat
 
 <p>There is still something that doesn&rsquo;t feel quite right. Consider <a href="http://www.amazon.com/Smalltalk-Best-Practice-Patterns-Kent/dp/013476904X">Kent Beck&rsquo;s advice</a>:</p>
 
-<blockquote><p>&ldquo;Divide your program into methods that perform one identifiable task. Keep all of the operations in a method at the same level of abstraction.&rdquo;&#8221;</p></blockquote>
+<blockquote><p>Divide your program into methods that perform one identifiable task. Keep all of the operations in a method at the same level of abstraction.</p></blockquote>
 
 <p>The <code>call</code> method invokes a few other methods, but these methods operate on different levels of abstractions: notifying a user is a domain-level concept, whereas updating a user&rsquo;s attributes is a lower-level, persistence related concept. Another way to put it: while the details of how exactly the user is going to be notified are hidden, the details of updating the attributes are exposed. The fact that active record gives us multiple ways of updating attributes makes this problem even clearer: what if we wanted to update attributes using accessors and save using active record&rsquo;s <code>save</code>? These details are irrelevant at the abstraction level of the method we&rsquo;re in and the method should not change if they do. <code>notifies_user</code> is treated as a role, while user is wrongly treated as the active record&rsquo;s implementation of a user role.</p>
 
@@ -433,7 +433,7 @@ This is an improvement, but hard-coding the name of the class of your collaborat
 
 <p>This brings us closer to a lofty design goal stated by Kent Beck:</p>
 
-<blockquote><p>&ldquo;When you can extend a system solely by adding new objects without modifying any existing objects, then you have a system that is flexible and cheap to maintain.&rdquo;</p></blockquote>
+<blockquote><p>When you can extend a system solely by adding new objects without modifying any existing objects, then you have a system that is flexible and cheap to maintain.</p></blockquote>
 
 <p>Using mocks and dependency injection with TDD makes sure your system is designed for this form of modularity from the get go. You know you can replace your objects with a different implementation because this is exactly what you did in your tests when you passed in mocks. Such design guarantees that you can write true, isolated and thus fast, tests.</p>
 
