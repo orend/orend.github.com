@@ -1,8 +1,8 @@
 <div class="sharing-box">
-  {% if site.twitter_tweet_button %}
+  {% if site.twitter_tweet_button and page.url != '/index.html' %}
   <a href="http://twitter.com/share" class="twitter-share-button" data-url="{{ site.url }}{{ page.url }}" data-via="{{ site.twitter_user }}" data-counturl="{{ site.url }}{{ page.url }}" data-size="large">Tweet</a>
   {% endif %}
-  {% if site.google_plus_one %}
+  {% if site.google_plus_one and page.url != '/index.html' %}
   <div class="g-plusone" data-size="{{ site.google_plus_one_size }}"></div>
   {% endif %}
 </div>
