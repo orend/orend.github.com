@@ -4,7 +4,7 @@
   <title><![CDATA[Re-factor]]></title>
   <link href="http://re-factor.com/atom.xml" rel="self"/>
   <link href="http://re-factor.com/"/>
-  <updated>2014-03-19T21:58:56-04:00</updated>
+  <updated>2014-03-20T10:19:27-04:00</updated>
   <id>http://re-factor.com/</id>
   <author>
     <name><![CDATA[Oren Dobzinski]]></name>
@@ -12,6 +12,17 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Guest Post On The Code Climate Blog]]></title>
+    <link href="http://re-factor.com/blog/2014/03/20/guest-post-on-the-code-climate-blog/"/>
+    <updated>2014-03-20T09:59:00-04:00</updated>
+    <id>http://re-factor.com/blog/2014/03/20/guest-post-on-the-code-climate-blog</id>
+    <content type="html"><![CDATA[<p>Head out to the Code Climate blog and read my guest post there called <a href="http://blog.codeclimate.com/blog/2014/03/20/kickstart-your-next-project-with-a-walking-skeleton/">Kickstart your next project with a Walking Skeleton</a>. It&rsquo;s a about a technique I&rsquo;ve used successfully that helps you validate the design of a system you are just starting to build. Lots of great posts there.</p>
+
+<p>Many thanks to Frazer Horn and Susan Potter for reviewing an early draft of the post.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Slow Tests are the Symptom, not the Cause]]></title>
