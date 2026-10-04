@@ -32,10 +32,7 @@
   .card { display:flex; gap:10px; background:#fff; border:1px solid var(--line);
     border-radius:8px; padding:9px; cursor:pointer }
   .card:hover { border-color:#3b5bdb }
-  .source-panel { width:100%; min-height:180px; border-radius:8px; background:#e9ecef; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; text-align:center; padding:24px }
-  .source-panel p { margin:0; color:var(--sub) }
-  .watch-link { display:inline-block; padding:10px 16px; border-radius:6px; background:#3b5bdb; color:white; text-decoration:none; font-weight:600 }
-  .watch-link:hover { background:#364fc7 }
+  .card img { width:104px; height:59px; object-fit:cover; border-radius:5px }
   .trange { font-weight:600; font-size:13.5px }
   .chip { color:#fff; font-size:11px; padding:1px 8px; border-radius:9px; margin-right:5px }
   .conf { font-size:11px; color:var(--sub) }
@@ -52,14 +49,14 @@
 <h1>Surgical Moment Index</h1>
 <div class="sub">Tool-presence index over an aneurysm clipping operative video.
  Labeled window: 5:00&ndash;6:30 of 19:08.
- Click any segment, flag, or card to open the source video at that time on YouTube.</div>
+ Click any segment, flag, or card to jump the player.</div>
 <p class="intro">Teaching videos are long, and finding the moment you need means
  scrubbing. This page shows the product idea: the video indexed by what is
  visible in the surgical field, so an educator or fellow jumps straight to
  "bipolar in use" or a named landmark instead of hunting for it. In the full
  product every minute of every video is indexed; this demo indexes one
  90-second window as a proof of the experience.</p>
-<div class="source-panel"><p>The source video is hosted on YouTube. It may ask you to sign in to verify your age.</p><a class="watch-link" href="https://www.youtube.com/watch?v=sm9CiTVQU6s&t=300s" target="_blank" rel="noopener noreferrer">Watch from 5:00 on YouTube ↗</a></div>
+<video id="player" src="source_video.mp4#t=300" controls preload="metadata"></video>
 <div class="context">
   <div class="context-bar"><div class="context-win" style="left:26.13%;width:7.84%"></div></div>
   <div class="context-cap">Full video (19:08); highlighted region is the labeled window.</div>
@@ -74,61 +71,73 @@
   <span><i style="background:#e8590c"></i>editor caption</span>
 </div>
 <div class="cards"><div class="card" data-t="300">
+      <img src="frames/f_01.jpg" alt="frame at 5:00">
       <div class="meta">
         <div class="trange">5:00 &ndash; 5:05</div>
         <div><span class="chip" style="background:#3b5bdb">bipolar</span><span class="conf conf-low">low confidence</span></div>
         <div class="note">paired dark tines converging in deep corridor</div>
       </div></div><div class="card" data-t="305">
+      <img src="frames/f_02.jpg" alt="frame at 5:05">
       <div class="meta">
         <div class="trange">5:05 &ndash; 5:10</div>
         <div><span class="chip" style="background:#3b5bdb">bipolar</span><span class="chip" style="background:#868e96">other</span><span class="conf conf-low">low confidence</span></div>
         <div class="note">paired tines at tissue; second shaft right</div>
       </div></div><div class="card" data-t="310">
+      <img src="frames/f_04.jpg" alt="frame at 5:10">
       <div class="meta">
         <div class="trange">5:10 &ndash; 5:25</div>
         <div><span class="chip" style="background:#3b5bdb">bipolar</span><span class="conf conf-low">low confidence</span></div>
         <div class="note">tines on bluish-gray structure</div>
       </div></div><div class="card" data-t="325">
+      <img src="frames/f_06.jpg" alt="frame at 5:25">
       <div class="meta">
         <div class="trange">5:25 &ndash; 5:30</div>
         <div><span class="chip" style="background:#dee2e6">none</span><span class="conf conf-med">med confidence</span> <span class="qual">defocus</span></div>
         <div class="note">empty defocused field, instruments withdrawn</div>
       </div></div><div class="card" data-t="330">
+      <img src="frames/f_08.jpg" alt="frame at 5:30">
       <div class="meta">
         <div class="trange">5:30 &ndash; 5:45</div>
         <div><span class="chip" style="background:#3b5bdb">bipolar</span><span class="chip" style="background:#868e96">other</span><span class="conf conf-med">med confidence</span></div>
         <div class="note">blue insulated bipolar from right; static dark structure left (retractor-like)</div>
       </div></div><div class="card" data-t="345">
+      <img src="frames/f_11.jpg" alt="frame at 5:45">
       <div class="meta">
         <div class="trange">5:45 &ndash; 5:55</div>
         <div><span class="chip" style="background:#3b5bdb">bipolar</span><span class="conf conf-med">med confidence</span></div>
         <div class="note">single blue shaft visible, partial view; pale structure center</div>
       </div></div><div class="card" data-t="355">
+      <img src="frames/f_13.jpg" alt="frame at 5:55">
       <div class="meta">
         <div class="trange">5:55 &ndash; 6:05</div>
         <div><span class="chip" style="background:#3b5bdb">bipolar</span><span class="chip" style="background:#868e96">other</span><span class="conf conf-med">med confidence</span></div>
         <div class="note">dark tipped instrument center-left</div>
       </div></div><div class="card" data-t="365">
+      <img src="frames/f_14.jpg" alt="frame at 6:05">
       <div class="meta">
         <div class="trange">6:05 &ndash; 6:10</div>
         <div><span class="chip" style="background:#3b5bdb">bipolar</span><span class="chip" style="background:#0c8599">suction</span><span class="conf conf-low">low confidence</span></div>
         <div class="note">dark tube center, possible suction</div>
       </div></div><div class="card" data-t="370">
+      <img src="frames/f_15.jpg" alt="frame at 6:10">
       <div class="meta">
         <div class="trange">6:10 &ndash; 6:15</div>
         <div><span class="chip" style="background:#3b5bdb">bipolar</span><span class="conf conf-med">med confidence</span></div>
         <div class="note">editor caption overlay present</div>
       </div></div><div class="card" data-t="375">
+      <img src="frames/f_16.jpg" alt="frame at 6:15">
       <div class="meta">
         <div class="trange">6:15 &ndash; 6:20</div>
         <div><span class="chip" style="background:#3b5bdb">bipolar</span><span class="chip" style="background:#0c8599">suction</span><span class="conf conf-med">med confidence</span></div>
         <div class="note">dark tube with rounded tip center, suction-like</div>
       </div></div><div class="card" data-t="380">
+      <img src="frames/f_17.jpg" alt="frame at 6:20">
       <div class="meta">
         <div class="trange">6:20 &ndash; 6:25</div>
         <div><span class="chip" style="background:#3b5bdb">bipolar</span><span class="conf conf-med">med confidence</span></div>
         <div class="note">blue shafts, open cavity</div>
       </div></div><div class="card" data-t="385">
+      <img src="frames/f_18.jpg" alt="frame at 6:25">
       <div class="meta">
         <div class="trange">6:25 &ndash; 6:30</div>
         <div><span class="chip" style="background:#dee2e6">none</span><span class="conf conf-low">low confidence</span> <span class="qual">severe_blur</span></div>
@@ -153,14 +162,17 @@
 <h2>Attribution</h2>
 <p class="attr">Video: <a href="https://www.youtube.com/watch?v=sm9CiTVQU6s">Operative Video:
  Acom Aneurysm Microsurgical Clipping</a> by Arunav Sharma, YouTube,
- Creative Commons Attribution license as reported by YouTube. This public page links to the source video; it does not host a video copy or extracted frames. The uploader's authority to license the footage has not been independently verified.</p>
+ Creative Commons Attribution license as reported by YouTube. This page plays an
+ optimized copy of the source video, with sampled-frame thumbnails, under the
+ same attribution. The uploader's authority to license the footage has not been
+ independently verified.</p>
 </div>
 <script>
-const videoId = 'sm9CiTVQU6s';
+var v = document.getElementById('player');
 document.querySelectorAll('[data-t]').forEach(function(el) {
   el.addEventListener('click', function() {
-    const seconds = parseInt(el.dataset.t, 10);
-    window.open('https://www.youtube.com/watch?v=' + videoId + '&t=' + seconds + 's', '_blank', 'noopener,noreferrer');
+    v.currentTime = parseInt(el.dataset.t, 10);
+    v.play();
   });
 });
 </script></body></html>
