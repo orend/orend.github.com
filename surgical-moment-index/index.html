@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Surgical Moment Index</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { --ink:#212529; --sub:#495057; --line:#dee2e6; --bg:#f8f9fa; }
+  * { box-sizing:border-box }
+  body { margin:0; font:15px/1.5 -apple-system,'Segoe UI',sans-serif; color:var(--ink); background:var(--bg) }
+  .wrap { max-width:960px; margin:0 auto; padding:24px 20px 60px }
+  .banner { background:#fff3bf; border:1px solid #f0c948; border-radius:6px;
+    padding:8px 14px; font-size:13.5px; margin-bottom:18px }
+  h1 { font-size:22px; margin:0 0 2px }
+  .sub { color:var(--sub); font-size:13.5px; margin-bottom:16px }
+  #player { width:100%; aspect-ratio:16/9; border:0; border-radius:8px; background:#000 }
+  .context { margin:22px 0 4px }
+  .context-bar { position:relative; height:10px; background:var(--line); border-radius:5px }
+  .context-win { position:absolute; top:0; height:100%; background:#3b5bdb55;
+    border:1px solid #3b5bdb; border-radius:3px }
+  .context-cap { font-size:12px; color:var(--sub); margin-top:4px }
+  .tl { position:relative; margin-top:34px }
+  .tl-bar { display:flex; height:30px; border-radius:6px; overflow:hidden; cursor:pointer }
+  .seg:hover { filter:brightness(1.18) }
+  .flag { position:absolute; top:-26px; cursor:pointer }
+  .flag::after { content:""; position:absolute; left:0; top:22px; height:34px; border-left:2px dashed #e8590c }
+  .flag span { background:#e8590c; color:#fff; font-size:11px; padding:1px 7px;
+    border-radius:3px; white-space:nowrap }
+  .axis { display:flex; justify-content:space-between; font-size:12px; color:var(--sub); margin-top:5px }
+  .legend { display:flex; gap:16px; font-size:12.5px; margin:12px 0 6px; color:var(--sub) }
+  .legend i { display:inline-block; width:11px; height:11px; border-radius:3px; margin-right:5px }
+  .cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; margin-top:18px }
+  .card { display:flex; gap:10px; background:#fff; border:1px solid var(--line);
+    border-radius:8px; padding:9px; cursor:pointer }
+  .card:hover { border-color:#3b5bdb }
+  .source-panel { width:100%; min-height:180px; border-radius:8px; background:#e9ecef; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; text-align:center; padding:24px }
+  .source-panel p { margin:0; color:var(--sub) }
+  .watch-link { display:inline-block; padding:10px 16px; border-radius:6px; background:#3b5bdb; color:white; text-decoration:none; font-weight:600 }
+  .watch-link:hover { background:#364fc7 }
+  .trange { font-weight:600; font-size:13.5px }
+  .chip { color:#fff; font-size:11px; padding:1px 8px; border-radius:9px; margin-right:5px }
+  .conf { font-size:11px; color:var(--sub) }
+  .conf-low::before { content:"\26A0 " }
+  .qual { font-size:11px; color:#e8590c }
+  .note { font-size:12.5px; color:var(--sub); margin-top:2px }
+  h2 { font-size:16px; margin:30px 0 6px }
+  .limits, .attr { font-size:13px; color:var(--sub) }
+  .intro { font-size:14px; max-width:72ch; margin:0 0 16px }
+  .limits li { margin-bottom:2px }
+</style></head><body><div class="wrap">
+<div class="banner"><b>Retrospective, experimental, not for clinical use.</b>
+ Labels are zero-shot model output, unvalidated by any surgeon.</div>
+<h1>Surgical Moment Index</h1>
+<div class="sub">Tool-presence index over an aneurysm clipping operative video.
+ Labeled window: 5:00&ndash;6:30 of 19:08.
+ Click any segment, flag, or card to open the source video at that time on YouTube.</div>
+<p class="intro">Teaching videos are long, and finding the moment you need means
+ scrubbing. This page shows the product idea: the video indexed by what is
+ visible in the surgical field, so an educator or fellow jumps straight to
+ "bipolar in use" or a named landmark instead of hunting for it. In the full
+ product every minute of every video is indexed; this demo indexes one
+ 90-second window as a proof of the experience.</p>
+<div class="source-panel"><p>The source video is hosted on YouTube. It may ask you to sign in to verify your age.</p><a class="watch-link" href="https://www.youtube.com/watch?v=sm9CiTVQU6s&t=300s" target="_blank" rel="noopener noreferrer">Watch from 5:00 on YouTube ↗</a></div>
+<div class="context">
+  <div class="context-bar"><div class="context-win" style="left:26.13%;width:7.84%"></div></div>
+  <div class="context-cap">Full video (19:08); highlighted region is the labeled window.</div>
+</div>
+<div class="tl"><div class="flag" data-t="350" style="left:55.56%"><span>Olfactory Nerve</span></div><div class="flag" data-t="370" style="left:77.78%"><span>Excision of Gyrus Rectus</span></div><div class="tl-bar"><div class="seg" data-t="300" style="width:5.56%;background:#3b5bdb" title="5:00-5:05 bipolar"></div><div class="seg" data-t="305" style="width:5.56%;background:#3b5bdb" title="5:05-5:10 bipolar + other"></div><div class="seg" data-t="310" style="width:16.67%;background:#3b5bdb" title="5:10-5:25 bipolar"></div><div class="seg" data-t="325" style="width:5.56%;background:#dee2e6" title="5:25-5:30 none"></div><div class="seg" data-t="330" style="width:16.67%;background:#3b5bdb" title="5:30-5:45 bipolar + other"></div><div class="seg" data-t="345" style="width:11.11%;background:#3b5bdb" title="5:45-5:55 bipolar"></div><div class="seg" data-t="355" style="width:11.11%;background:#3b5bdb" title="5:55-6:05 bipolar + other"></div><div class="seg" data-t="365" style="width:5.56%;background:#3b5bdb" title="6:05-6:10 bipolar + suction"></div><div class="seg" data-t="370" style="width:5.56%;background:#3b5bdb" title="6:10-6:15 bipolar"></div><div class="seg" data-t="375" style="width:5.56%;background:#3b5bdb" title="6:15-6:20 bipolar + suction"></div><div class="seg" data-t="380" style="width:5.56%;background:#3b5bdb" title="6:20-6:25 bipolar"></div><div class="seg" data-t="385" style="width:5.56%;background:#dee2e6" title="6:25-6:30 none"></div></div>
+<div class="axis"><span>5:00</span><span>5:45</span><span>6:30</span></div></div>
+<div class="legend">
+  <span><i style="background:#3b5bdb"></i>bipolar forceps</span>
+  <span><i style="background:#0c8599"></i>suction</span>
+  <span><i style="background:#868e96"></i>other instrument</span>
+  <span><i style="background:#dee2e6"></i>no instrument</span>
+  <span><i style="background:#e8590c"></i>editor caption</span>
+</div>
+<div class="cards"><div class="card" data-t="300">
+      <div class="meta">
+        <div class="trange">5:00 &ndash; 5:05</div>
+        <div><span class="chip" style="background:#3b5bdb">bipolar</span><span class="conf conf-low">low confidence</span></div>
+        <div class="note">paired dark tines converging in deep corridor</div>
+      </div></div><div class="card" data-t="305">
+      <div class="meta">
+        <div class="trange">5:05 &ndash; 5:10</div>
+        <div><span class="chip" style="background:#3b5bdb">bipolar</span><span class="chip" style="background:#868e96">other</span><span class="conf conf-low">low confidence</span></div>
+        <div class="note">paired tines at tissue; second shaft right</div>
+      </div></div><div class="card" data-t="310">
+      <div class="meta">
+        <div class="trange">5:10 &ndash; 5:25</div>
+        <div><span class="chip" style="background:#3b5bdb">bipolar</span><span class="conf conf-low">low confidence</span></div>
+        <div class="note">tines on bluish-gray structure</div>
+      </div></div><div class="card" data-t="325">
+      <div class="meta">
+        <div class="trange">5:25 &ndash; 5:30</div>
+        <div><span class="chip" style="background:#dee2e6">none</span><span class="conf conf-med">med confidence</span> <span class="qual">defocus</span></div>
+        <div class="note">empty defocused field, instruments withdrawn</div>
+      </div></div><div class="card" data-t="330">
+      <div class="meta">
+        <div class="trange">5:30 &ndash; 5:45</div>
+        <div><span class="chip" style="background:#3b5bdb">bipolar</span><span class="chip" style="background:#868e96">other</span><span class="conf conf-med">med confidence</span></div>
+        <div class="note">blue insulated bipolar from right; static dark structure left (retractor-like)</div>
+      </div></div><div class="card" data-t="345">
+      <div class="meta">
+        <div class="trange">5:45 &ndash; 5:55</div>
+        <div><span class="chip" style="background:#3b5bdb">bipolar</span><span class="conf conf-med">med confidence</span></div>
+        <div class="note">single blue shaft visible, partial view; pale structure center</div>
+      </div></div><div class="card" data-t="355">
+      <div class="meta">
+        <div class="trange">5:55 &ndash; 6:05</div>
+        <div><span class="chip" style="background:#3b5bdb">bipolar</span><span class="chip" style="background:#868e96">other</span><span class="conf conf-med">med confidence</span></div>
+        <div class="note">dark tipped instrument center-left</div>
+      </div></div><div class="card" data-t="365">
+      <div class="meta">
+        <div class="trange">6:05 &ndash; 6:10</div>
+        <div><span class="chip" style="background:#3b5bdb">bipolar</span><span class="chip" style="background:#0c8599">suction</span><span class="conf conf-low">low confidence</span></div>
+        <div class="note">dark tube center, possible suction</div>
+      </div></div><div class="card" data-t="370">
+      <div class="meta">
+        <div class="trange">6:10 &ndash; 6:15</div>
+        <div><span class="chip" style="background:#3b5bdb">bipolar</span><span class="conf conf-med">med confidence</span></div>
+        <div class="note">editor caption overlay present</div>
+      </div></div><div class="card" data-t="375">
+      <div class="meta">
+        <div class="trange">6:15 &ndash; 6:20</div>
+        <div><span class="chip" style="background:#3b5bdb">bipolar</span><span class="chip" style="background:#0c8599">suction</span><span class="conf conf-med">med confidence</span></div>
+        <div class="note">dark tube with rounded tip center, suction-like</div>
+      </div></div><div class="card" data-t="380">
+      <div class="meta">
+        <div class="trange">6:20 &ndash; 6:25</div>
+        <div><span class="chip" style="background:#3b5bdb">bipolar</span><span class="conf conf-med">med confidence</span></div>
+        <div class="note">blue shafts, open cavity</div>
+      </div></div><div class="card" data-t="385">
+      <div class="meta">
+        <div class="trange">6:25 &ndash; 6:30</div>
+        <div><span class="chip" style="background:#dee2e6">none</span><span class="conf conf-low">low confidence</span> <span class="qual">severe_blur</span></div>
+        <div class="note">object crossing near lens, indeterminate</div>
+      </div></div></div>
+<h2>How this was made</h2>
+<p class="attr">A vision model labeled one frame every 5 seconds (18 frames) for
+ suction, bipolar forceps, other instrument, or no instrument, zero-shot: no
+ training, no manual annotation, no model infrastructure. Consecutive frames
+ with the same tools were merged into the intervals above; the two orange flags
+ are caption overlays already present in the video that the model read and
+ indexed. This is a product demonstration, not a validation study; the
+ measurement plan that would validate label quality and cost lives in
+ POC_PLAN.md in this repository.</p>
+<h2>Known limits</h2>
+<ul class="limits">
+  <li>One frame per 5 seconds; brief appearances between samples are missed.</li>
+  <li>Presence only: no localization, masks, or tip tracking.</li>
+  <li>Single video, 90-second labeled window, labels unreviewed by a surgeon.</li>
+  <li>Low-confidence intervals are marked; treat them as candidates, not facts.</li>
+</ul>
+<h2>Attribution</h2>
+<p class="attr">Video: <a href="https://www.youtube.com/watch?v=sm9CiTVQU6s">Operative Video:
+ Acom Aneurysm Microsurgical Clipping</a> by Arunav Sharma, YouTube,
+ Creative Commons Attribution license as reported by YouTube. This public page links to the source video; it does not host a video copy or extracted frames. The uploader's authority to license the footage has not been independently verified.</p>
+</div>
+<script>
+const videoId = 'sm9CiTVQU6s';
+document.querySelectorAll('[data-t]').forEach(function(el) {
+  el.addEventListener('click', function() {
+    const seconds = parseInt(el.dataset.t, 10);
+    window.open('https://www.youtube.com/watch?v=' + videoId + '&t=' + seconds + 's', '_blank', 'noopener,noreferrer');
+  });
+});
+</script></body></html>
